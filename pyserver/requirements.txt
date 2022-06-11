@@ -1,0 +1,6 @@
+websockets==10.3
+PyJWT==2.4.0
+bcrypt==3.2.2
+pandas==1.4.2
+numpy==1.22.4
+sklearn==1.1.1
