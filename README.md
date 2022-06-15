@@ -31,7 +31,7 @@ In the project directory, you can run:
 
     See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `Python Websocket server`
+### `Python server is using Flask and Socket-IO`
 The websocket server is written using Python 3.9
 
 To run it:

@@ -62,18 +62,24 @@ def index():
       return jsonify(originalds)
 
 @app.route('/datasets/')
+@jwt_required()
+
 def datasets():
     return redirect('/')
 
 @app.route('/datasets/<dataset>')
 def dataset(description = None, head = None, dataset = None):
+   if not dataset:
+      return jsonify(exception="missing data set")
+
    df = loadDataset(dataset)
    try:
-      description = df.describe().round(2)
+      # description = df.describe().round(2)
       head = df.head(5)
       return jsonify(head.to_json())
 
    except Exception as e:
+      print(e)
       return jsonify(exception=traceback.format_exc())
 
 @app.errorhandler(500)
