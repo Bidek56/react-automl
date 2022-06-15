@@ -41,7 +41,7 @@ const NewTask = ({token}: {token: string|null}) => {
   const dogNameRef = React.useRef('Pluto')
   const catNameRef = React.useRef('Pubs')
 
-  const { ws, running, setLog } = React.useContext<contextType>(StatusContext);
+  const { socket, running, setLog } = React.useContext<contextType>(StatusContext);
 
   const onSelectedAnimalChange = (event: SelectChangeEvent<string>, child: React.ReactNode) => {
       setSelectedAnimal(event.target.value as string)
@@ -70,7 +70,7 @@ const NewTask = ({token}: {token: string|null}) => {
     }
 
     setLog(undefined);
-    ws?.current.send(JSON.stringify({ action: "doTask", token, animal, breed }));
+    // ws?.current.send(JSON.stringify({ action: "doTask", token, animal, breed }));
   }
 
   return (

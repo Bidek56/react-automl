@@ -1,4 +1,4 @@
-### The purpose of this project is to create a modern UI using React which connects to Python server using websocket in order to run long data tasks  
+### The purpose of this project is to create a modern UI using React which connects to Python Flask server
   
 The client of this project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and it uses [MUI](https://mui.com/)
 

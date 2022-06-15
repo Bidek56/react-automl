@@ -1,10 +1,12 @@
 import React from 'react'
-import { CookiesProvider, useCookies } from "react-cookie";
+// import { io } from "socket.io-client";
 import { StatusContext } from './StatusContext';
 import NewTask from './NewTask'
 import NavBar from './NavBar'
 import Login from './Login'
 import JobTableView from './JobView'
+
+import useToken from './useToken'
 
 interface IMessage {
     type: string;
@@ -19,8 +21,7 @@ interface IMessage {
 
 const App = () => {
 
-    const ws = React.useRef<any|null>(null);
-    const [user, setUser] = React.useState<string|null>(null)
+    const [socket, setSocket] = React.useState<any|null>(null);
     const [running, setRunning] = React.useState<boolean>(false)
     const [userCount, setUserCount] = React.useState<number>(0)
     const [completedCount, setCompletedCount] = React.useState<number>(0)
@@ -28,24 +29,32 @@ const App = () => {
     const [logContent, setLogContent] = React.useState<string|undefined>()
     const [loginError, setLoginError] = React.useState<string|undefined>()
 
-    const statusValue = React.useMemo(() => ({ ws, running, setRunning, 
+    const statusValue = React.useMemo(() => ({ socket, running, setRunning, 
                                                userCount, setUserCount,
                                                completedCount, setCompletedCount,
                                                log, setLog, logContent, loginError
-                                            }), [ws, running, setRunning, userCount, setUserCount, completedCount, setCompletedCount, log, setLog, logContent, loginError]);
-    const [cookies, setCookie, removeCookie] = useCookies(['token']);
+                                            }), [socket, running, setRunning, userCount, setUserCount, completedCount, setCompletedCount, log, setLog, logContent, loginError]);
 
-    const logout = () => {
-        removeCookie("token");
-        setUser(null)
+    const { token, removeToken, setToken } = useToken();
 
-        try {
-            ws.current.send(JSON.stringify({ action: "doLogout", logout: { user: user }} ));
+    const logout = async () => {
+
+        const url = "http://localhost:5000/logout";
+        const options = {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json;charset=UTF-8",
+            }
+        };
+
+        const response = await fetch(url, options);
+
+        console.log(response)
+
+        if(response.ok) {
+            removeToken();
         }
-		catch(err: unknown) {
-            if (err instanceof Error)
-		        console.error("WS error:", err.message);
-		}
     }
 
     const onReceiveMessage = ({ data }: { data: string; }) => {
@@ -63,12 +72,12 @@ const App = () => {
                 setLogContent(obj?.log_content)
                 break;
             case "users":
-                setUserCount(obj?.count);
+                // setUserCount(obj?.count);
                 break;
             case "token":
                 if (obj?.token) {
-                    setCookie("token", obj?.token, { maxAge: 3600, sameSite: 'strict'});
-                    if (obj?.user) setUser(obj?.user);
+                    // setCookie("token", obj?.token, { maxAge: 3600, sameSite: 'strict'});
+                    // if (obj?.user) setUser(obj?.user);
                     setLoginError(undefined)
                 } else {
                     setLoginError("Token not found");
@@ -87,46 +96,41 @@ const App = () => {
         setLoginError("Websocket error")
     }
 
-    React.useEffect(() => {
+    // React.useEffect(() => {
 
-		//  ws?.current?.close();
-        // console.log("Existing WS:", ws.current)
+    //     const foo = async () => {
+    //         try {
+    //             const socket = io(`http://${window.location.hostname}:5000`);
+    //             // const newSocket = io(`http://${window.location.hostname}:5000`, token && { query: { token } });
+    //             setSocket(socket);
 
-		try {
-            if (!ws.current) {
-			    ws.current = new WebSocket(`ws://localhost:6789`);
-			    // console.log("New WS:", ws.current)
-            }
+    //             // client-side
+    //             socket.on("connect", () => {
+    //                 console.log("Socket id:", socket.id); // x8WIv7-mJelg7on_ALbx
+    //             });
 
-			if (ws.current) {
-				ws.current.addEventListener("message", onReceiveMessage);
-                ws.current.addEventListener("error", onError);
-			}
-
-			return () => {
-				ws.current.removeEventListener("message", onReceiveMessage);
-			};
-		}
-		catch(err: unknown) {
-            if (err instanceof Error)
-			    console.error("Error:", err.message);
-		}
-	});
+    //             return () => socket.close();
+    //         }
+    //         catch(err: unknown) {
+    //             if (err instanceof Error)
+    //                 console.error("Error:", err.message);
+    //         }
+    //     }
+    //     foo();
+    //   }, [setSocket]);
 
     return (
-        <CookiesProvider>
             <StatusContext.Provider value={statusValue}>
-                { user || cookies?.token ?
-                    <div>                        
+                { token ?
+                    <div>
                         <NavBar logout={logout} />
                         <br/>
-                        <NewTask token={cookies?.token}/>
+                        <NewTask token={token}/>
                         <br/>
                         <JobTableView/>                        
-                    </div> : <Login setUser={setUser} />
+                    </div> : <Login setToken={setToken} />
                 }
             </StatusContext.Provider>
-        </CookiesProvider>
     )
 }
 

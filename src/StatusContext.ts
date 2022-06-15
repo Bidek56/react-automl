@@ -1,7 +1,7 @@
 import React from 'react'
 
 export type contextType = {
-    ws: React.MutableRefObject<any>;
+    socket: React.MutableRefObject<any>;
     running: boolean; 
     setRunning: React.Dispatch<React.SetStateAction<boolean>>;
     userCount: number; 
@@ -14,7 +14,7 @@ export type contextType = {
     loginError: string|undefined;
 };
 
-export const StatusContext = React.createContext<contextType>({ ws: {} as React.MutableRefObject<any>,
+export const StatusContext = React.createContext<contextType>({ socket: {} as React.MutableRefObject<any>,
                                                 running: false, setRunning: {} as React.Dispatch<React.SetStateAction<boolean>>,
                                                 userCount: 0, setUserCount: {} as React.Dispatch<React.SetStateAction<number>>,
                                                 completedCount: 0, setCompletedCount: {} as React.Dispatch<React.SetStateAction<number>>,

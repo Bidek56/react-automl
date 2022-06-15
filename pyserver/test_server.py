@@ -45,7 +45,7 @@ class TestApp(unittest.TestCase):
 
         self.assertEqual(response.get_data(as_text=True), "file uploaded successfully")
 
-        # Clean up uploaded file    
+        # Clean up uploaded file
         os.remove(file)
 
     def test_dataset(self):
@@ -55,6 +55,27 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         expected = '{"a":{"0":1},"b":{"0":2},"c":{"0":3}}'
         self.assertEqual(response.get_json(), expected)
+
+    def test_token(self):
+
+        data = {"user":"admin", "pass":"admin"}
+        response = self.client.post('/token', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # print(f"Res: {response.get_json()}")
+
+        self.assertTrue("access_token" in response.get_json())
+
+    def test_logout(self):
+
+        response = self.client.post('/logout', content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # print(f"Res: {response.get_json()}")
+
+        expected = {"msg": "logout successful"}
+        self.assertEqual(response.get_json(), expected)
+
 
 @unittest.skip("demonstrating skipping")
 class TestStringMethods(unittest.TestCase):

@@ -1,12 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Alert, Avatar, Button, Container, Box, CssBaseline, TextField, Typography, Link } from '@mui/material';
-
 import { LockOutlined } from '@mui/icons-material';
 
-import { StatusContext, contextType } from './StatusContext';
-
-type LoginProps = { setUser: (username: string | null) => void, }
+type LoginProps = { setToken: (username: string | null) => void, }
 
 function Copyright() {
     return (
@@ -19,24 +16,36 @@ function Copyright() {
     );
 }
  
-const Login = ({ setUser }: LoginProps ) => {
+const Login = ({ setToken }: LoginProps ) => {
 
     const userRef = React.useRef<string>('');
     const passRef = React.useRef<string>('');
+    const [loginError, setLoginError] = React.useState<string|undefined>()
 
-    const { ws, loginError } = React.useContext<contextType>(StatusContext);
+    const logMeIn = async () => {
 
-    const getUserWs = async () => {
+        const url = "http://localhost:5000/token";
+        const options = {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json;charset=UTF-8",
+            },
+            body: JSON.stringify({ user: userRef?.current, pass: passRef?.current }),
+        };
 
-        // console.log("Login WS:", ws.current)
+        const response = await fetch(url, options);
 
-        try {
-            ws.current.send(JSON.stringify({ action: "doLogin", login: { user: userRef?.current, pass: passRef?.current }} ));
+        // console.log(response)
+
+        const resp = await response.json();
+
+        if(response.ok) {
+            // console.log(resp);
+            setToken(resp["access_token"]);
+        } else {
+            setLoginError(resp["msg"]);
         }
-		catch(err: unknown) {
-            if (err instanceof Error)
-		        console.error(err.message);
-		}
     }
 
     const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -45,18 +54,18 @@ const Login = ({ setUser }: LoginProps ) => {
         if (!userRef?.current) {
             console.log('Missing user')
             alert('Missing user')
-            setUser(null)
+            setToken(null)
             return
         }
 
         if (!passRef?.current) {
             console.log('Missing password')
             alert('Error: Missing password')
-            setUser(null)
+            setToken(null)
             return
         }
 
-        getUserWs()
+        logMeIn()
     }
 
     return (
@@ -84,7 +93,7 @@ const Login = ({ setUser }: LoginProps ) => {
 }
 
 Login.propTypes = {
-    setUser: PropTypes.func.isRequired
+    setToken: PropTypes.func.isRequired
 }
 
 export default Login;
