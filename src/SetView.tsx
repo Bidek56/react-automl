@@ -1,70 +1,31 @@
 import React from 'react'
-import { StatusContext, contextType } from './StatusContext';
-import { Button, TableContainer, Table, TableBody, TableCell, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { Assignment } from '@mui/icons-material';
-
-// Dialog related items
-import { DialogProps } from '@mui/material/Dialog';
+import { Button, TableContainer, Table, TableBody, TableCell, TableHead, TableRow, Paper } from '@mui/material';
+import { DataGrid, GridToolbar, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 
 
-const ScrollDialog: React.FC<{ path: string, logContent: string|undefined }> = ({ path, logContent }) => {
+const ProfileGrid: React.FC<{dataSet: any}> = ({dataSet}): JSX.Element => {
 
-    const [open, setOpen] = React.useState(false);
-    const [scroll, setScroll] = React.useState<DialogProps['scroll']>('paper');
+    // console.log("Dataset:", dataSet);
 
-    const descriptionElementRef = React.useRef<HTMLElement>(null);
-    React.useEffect(() => {
-        const { current: descriptionElement } = descriptionElementRef;
-        if (descriptionElement !== null) {
-            descriptionElement.focus();
-        }
-    }, [open]);
+    const columns: GridColDef[] = Object.keys(dataSet[0]).map((c) => {
+        return { field: c, headerName: c, width: 150 };
+    });
 
-    const handleClickOpen = (scrollType: DialogProps['scroll']) => () => {
-        setOpen(true);
-        setScroll(scrollType);
-    };
+    const rows: GridRowsProp[] = Object.entries(dataSet).map(([key, value]:[string, any]) => {
+        return { id: key, ...value };
+    });
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    return <DataGrid autoHeight rows={rows} columns={columns} components={{ Toolbar: GridToolbar }} />;
+}
 
-    return (
-        <div>
-            <Button variant="contained" color="primary" endIcon={<Assignment />} onClick={handleClickOpen('paper')}>Show Log</Button>
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                scroll={scroll}
-                aria-labelledby="scroll-dialog-title"
-                aria-describedby="scroll-dialog-description"
-                maxWidth='lg'
-            >
-                <DialogTitle id="scroll-dialog-title">Log for: {path}</DialogTitle>
-                <DialogContent dividers={scroll === 'paper'}>
-                    <DialogContentText
-                        id="scroll-dialog-description"
-                        ref={descriptionElementRef}
-                        tabIndex={-1}
-                        style={{ whiteSpace: 'pre-line' }}
-                    >
-                        {logContent}
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="secondary">Close</Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    );
+interface IDictionary<T> {
+    [index:string]: T;
 }
 
 const SetView = (): JSX.Element => {
 
-    const { userCount, completedCount, log, logContent } = React.useContext<contextType>(StatusContext);
-
     const [dataSets, setDataSets] = React.useState<string[]>([]);
-    const [profile, setProfile] = React.useState<any>();
+    const [dataSet, setDataSet] = React.useState<IDictionary<string> | null>(null);
 
     React.useEffect(() => {
 
@@ -79,11 +40,8 @@ const SetView = (): JSX.Element => {
             };
 
             const response = await fetch(url, options);
-
             const resp = await response.json();
-
-            console.log(resp);
-
+            // console.log(resp);
             setDataSets(resp);
         };
 
@@ -92,7 +50,12 @@ const SetView = (): JSX.Element => {
     }, []);
 
     const handleProfile = async (dsName: string) => {
-        console.log("The Values that you wish to edit ", dsName);
+        // console.log("The Values that you wish to edit ", dsName);
+
+        if (dataSet) {
+            setDataSet(null);
+            return;
+        }
 
         const url = `http://${window.location.hostname}:5000/datasets/${dsName}`;
         const options = {
@@ -104,14 +67,12 @@ const SetView = (): JSX.Element => {
         };
 
         const response = await fetch(url, options);
+        const resp = await response?.json();
 
-        const resp = await response.json();
+        // console.log("Resp:", JSON.parse(resp));
 
-        // if ('exception' in resp){
-            console.log(resp);
-        // }
-
-        setProfile(resp);
+        if (resp)
+            setDataSet(JSON.parse(resp));
       };
 
     return (
@@ -136,11 +97,7 @@ const SetView = (): JSX.Element => {
                     )) }
                 </TableBody>
             </Table>
-
-            { profile &&
-            <Table sx={{minWidth: 650}}>
-
-            </Table> }
+            { dataSet && <ProfileGrid dataSet={dataSet}/> }
         </TableContainer>
     )
 

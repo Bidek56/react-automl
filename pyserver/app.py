@@ -76,7 +76,7 @@ def dataset(description = None, head = None, dataset = None):
    try:
       # description = df.describe().round(2)
       head = df.head(5)
-      return jsonify(head.to_json())
+      return jsonify(head.to_json(orient='records'))
 
    except Exception as e:
       print(e)
@@ -108,7 +108,6 @@ def logout():
     unset_jwt_cookies(response)
     return response
 
-
 @app.route('/profile')
 @jwt_required()
 def my_profile():
@@ -125,8 +124,8 @@ def test_connect():
    print("Connected")
    emit('after connect',  {'data':'Lets dance'})
 
-# if __name__ == '__main__':
-#    app.run(debug = True)
-
 if __name__ == '__main__':
-    socketio.run(app)
+   app.run(debug = True)
+
+# if __name__ == '__main__':
+#     socketio.run(app)
