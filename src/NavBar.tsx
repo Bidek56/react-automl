@@ -9,12 +9,11 @@ const NavBar = ({ logout }: { logout: () => void }) => {
         <Paper elevation={2} sx={{ py: 1, px: 1.5, backgroundColor: '#e3f2fd' }}>
             <Breadcrumbs aria-label="breadcrumb">
                 <Link color="inherit" href="/" sx={{display: 'flex'}}>
-                    <Home sx={{py: 0.5, width: 20, height: 20 }} />
-                Menu
-            </Link>
-                <Link color="inherit" href='/' sx={{display: 'flex'}} onClick={logout} >
+                    <Home sx={{py: 0.5, width: 20, height: 20 }} />Menu
+                </Link>
+                <Link color="inherit" sx={{display: 'flex'}} onClick={logout} >
                     <ExitToApp sx={{py: 0.5, width: 20, height: 20 }} />Logout
-            </Link>
+                </Link>
             </Breadcrumbs>
         </Paper>
     );

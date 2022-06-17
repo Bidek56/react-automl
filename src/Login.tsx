@@ -24,7 +24,7 @@ const Login = ({ setToken }: LoginProps ) => {
 
     const logMeIn = async () => {
 
-        const url = `http://${window.location.hostname}:5000/token`;
+        const url = `http://${window.location.hostname}:5000/login`;
         const options = {
             method: "POST",
             headers: {

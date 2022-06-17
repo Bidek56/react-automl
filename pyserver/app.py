@@ -1,12 +1,16 @@
 from flask import Flask, render_template, request, jsonify, redirect
-import os
+import os, datetime
 import pandas as pd
 import traceback
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
-from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
-                               unset_jwt_cookies, jwt_required, JWTManager
+from flask_jwt_extended import (
+    JWTManager, jwt_required, get_jwt, create_access_token,
+    create_refresh_token,
+    get_jwt_identity, set_access_cookies,
+    set_refresh_cookies, unset_jwt_cookies
+)
 
 from werkzeug.utils import secure_filename
 
@@ -14,6 +18,10 @@ app = Flask(__name__)
 CORS(app)
 
 app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
+app.config['JWT_COOKIE_CSRF_PROTECT'] = True
+app.config["JWT_TOKEN_LOCATION"] = ['cookies']
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(hours=0.005)
+
 jwt = JWTManager(app)
 
 socketio = SocketIO(app, cors_allowed_origins=['http://localhost:3000'])
@@ -24,7 +32,7 @@ def datasetList():
     folders = [f for f in ['datasets', 'preprocessed'] for x in os.listdir(f)]
     return datasets, extensions, folders
 
-#Load Dataset    
+# Load Dataset
 def loadDataset(dataset):
     datasets, extensions, folders = datasetList()
     if dataset in datasets:
@@ -90,17 +98,37 @@ def internal_error(e):
 def page_not_found(e):
    return jsonify("Route not found"), 404, {'content-type': 'application/json'}
 
-@app.route('/token', methods=["POST"])
-def create_token():
+@app.route("/login", methods=["POST"])
+def login():
+
    user = request.json.get("user", None)
    pasd = request.json.get("pass", None)
    if user != "admin" or pasd != "admin":
       return {"msg": "Wrong user or password"}, 401
 
    access_token = create_access_token(identity=user)
-   response = {"access_token":access_token}
 
+   response = jsonify({"access_token": access_token})
+   set_access_cookies(response, access_token)
    return response
+
+
+# Using an `after_request` callback, we refresh any token that is within 30
+# minutes of expiring. Change the timedeltas to match the needs of your application.
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(datetime.timezone.utc)
+        target_timestamp = datetime.timestamp(now + datetime.timedelta(minutes=30))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original response
+        return response
+
 
 @app.route("/logout", methods=["POST"])
 def logout():

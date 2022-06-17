@@ -38,12 +38,14 @@ const App = () => {
 
         const response = await fetch(url, options);
 
-        console.log(response)
+        // console.log("Logout res:", response)
 
-        if(response.ok) {
+        if (response.ok) {
             removeToken();
         }
     }
+
+    // console.log("Token:", token);
 
     return (
             <StatusContext.Provider value={statusValue}>
