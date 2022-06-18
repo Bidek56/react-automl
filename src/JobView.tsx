@@ -61,7 +61,9 @@ const ScrollDialog: React.FC<{ path: string, logContent: string|undefined }> = (
 
 const JobTableView = (): JSX.Element => {
 
-    const { userCount, completedCount, log, logContent } = React.useContext<contextType>(StatusContext);
+    const { userCount, completedCount, log } = React.useContext<contextType>(StatusContext);
+
+    const logContent: string | undefined = undefined;
 
     return (
         <Table sx={{minWidth: 650}}>

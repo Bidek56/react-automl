@@ -1,7 +1,8 @@
-import React, {useCallback} from 'react'
+import React from 'react'
 import {useDropzone} from 'react-dropzone'
+import { Alert } from '@mui/material';
 import styled from 'styled-components';
-
+import { StatusContext, contextType } from './StatusContext';
 
 const getColor = (props:any) => {
   if (props.isDragAccept) {
@@ -34,30 +35,52 @@ const Container = styled.div`
 
 const UploadFile = () : JSX.Element => {
 
-  // const [uploadFile, { loading, error }] = useMutation(SINGLE_UPLOAD, {
+  const { token } = React.useContext<contextType>(StatusContext);
+  const [ error, setError ] = React.useState<string|undefined>();
 
-  //   // update the cache
-  //   update( cache, { data: {singleUpload}}) {
-  //     const {uploads} = cache.readQuery( { query: GET_UPLOADS } );
+  const upload = async (file: File) => {
 
-  //     cache.writeQuery({
-  //       query: GET_UPLOADS,
-  //       data: { uploads: uploads.concat([singleUpload]) },
-  //     });
-  //   }   
-  // });
+    if (!file) {
+      return
+    }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const data = new FormData();
+    data.append('file', file);
+
+    const url = `http://${window.location.hostname}:5000/uploader`;
+    const options = {
+        method: "POST",
+        headers: { 
+          Authorization: 'Bearer ' + token
+        },
+        body: data
+    };
+
+    const response = await fetch(url, options);
+    
+    // console.log("Resp:", response);
+
+    const resp = await response?.json();
+    
+    // console.log("Resp:", resp);
+
+    if (resp["msg"] === "file uploaded successfully") {
+
+    } else if (resp["msg"] === "file not found") {
+      setError(resp["msg"]);
+    }
+  }
+  
+  const onDrop = (acceptedFiles: File[]) => {  
     // Do something with the files
     acceptedFiles.forEach((file: File) => {
-      console.log("Accepted:", file)
-      // uploadFile({ variables: { file } });
+      upload(file);
     })
-  }, [])
-  const {getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject} = useDropzone({onDrop})
+  }
 
-  // if (loading) return <div>Loading...</div>;
-  // if (error)   return <div>{JSON.stringify(error, null, 2)}</div>;
+  const {getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject} = useDropzone({onDrop})
+  
+  if (error) return <Alert severity="error">Upload error: {error}</Alert>;
 
   return (
       <Container {...getRootProps({isDragActive, isDragAccept, isDragReject})}>

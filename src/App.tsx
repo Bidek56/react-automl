@@ -14,16 +14,14 @@ const App = () => {
     const [userCount, setUserCount] = React.useState<number>(0)
     const [completedCount, setCompletedCount] = React.useState<number>(0)
     const [log, setLog] = React.useState<string|undefined>()
-    const [logContent, setLogContent] = React.useState<string|undefined>()
-    const [loginError, setLoginError] = React.useState<string|undefined>()
-
-    const statusValue = React.useMemo(() => ({ socket, running, setRunning, 
-                                               userCount, setUserCount,
-                                               completedCount, setCompletedCount,
-                                               log, setLog, logContent, loginError
-                                            }), [socket, running, setRunning, userCount, setUserCount, completedCount, setCompletedCount, log, setLog, logContent, loginError]);
 
     const { token, removeToken, setToken } = useToken();
+
+    const statusValue = React.useMemo(() => ({ token, socket, running, setRunning, 
+                                               userCount, setUserCount,
+                                               completedCount, setCompletedCount,
+                                               log, setLog
+                                            }), [token, socket, running, setRunning, userCount, setUserCount, completedCount, setCompletedCount, log, setLog, ]);
 
     const logout = async () => {
 
@@ -33,6 +31,7 @@ const App = () => {
             headers: {
                 Accept: "application/json",
                 "Content-Type": "application/json;charset=UTF-8",
+                Authorization: 'Bearer ' + token
             }
         };
 

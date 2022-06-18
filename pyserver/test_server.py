@@ -1,6 +1,4 @@
-import unittest
-import os, json
-from urllib import response
+import unittest, os, json
 
 from app import app
 
@@ -23,13 +21,32 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.get_json(), 'Route not found')
 
+    def test_alogin(self):
+
+        data = {"user":"admin", "pass":"admin"}
+        response = self.client.post('/login', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # print(f"Res: {response.get_json()}")
+        resp_json = response.get_json()
+
+        self.assertTrue("access_token" in response.get_json())
+
+        # print(f"Token: {resp_json['access_token']}")
+
+        self.__class__.token = resp_json['access_token']
+
     def test_root(self):
-        response = self.client.get('/')
+
+        # print(f"Root token: {self.__class__.token}")
+
+        response = self.client.get('/', headers={"Authorization": f"Bearer {self.__class__.token}"})
+
         # print(f"Res: {response}")
         # print(response.get_json())
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json(), ['sample'])
+        self.assertEqual(response.get_json(), ['sample', 'boston_house_prices'])
 
     def test_upload_csv(self):
         folder = "datasets"
@@ -38,18 +55,16 @@ class TestApp(unittest.TestCase):
 
         response = self.client.post('/uploader', data=data, 
                                     follow_redirects=True,
-                                    content_type='multipart/form-data', )
+                                    content_type='multipart/form-data', headers={"Authorization": f"Bearer {self.__class__.token}"})
 
         self.assertEqual(response.status_code, 200)
         # print(f"Res: {response}")
 
-        self.assertEqual(response.get_data(as_text=True), "file uploaded successfully")
-
-        # Clean up uploaded file
-        os.remove(file)
+        expected = {"msg": "file uploaded successfully"}
+        self.assertEqual(response.get_json(), expected)
 
     def test_dataset(self):
-        response = self.client.get('/datasets/sample')
+        response = self.client.get('/datasets/sample', headers={"Authorization": f"Bearer {self.__class__.token}"})
         # print(f"Res: {response.text}")
 
         self.assertEqual(response.status_code, 200)
@@ -57,19 +72,9 @@ class TestApp(unittest.TestCase):
         expected = '[{\"a\":1,\"b\":2,\"c\":3},{\"a\":4,\"b\":5,\"c\":6}]'
         self.assertEqual(response.get_json(), expected)
 
-    def test_token(self):
-
-        data = {"user":"admin", "pass":"admin"}
-        response = self.client.post('/token', data=json.dumps(data), content_type='application/json')
-        self.assertEqual(response.status_code, 200)
-
-        # print(f"Res: {response.get_json()}")
-
-        self.assertTrue("access_token" in response.get_json())
-
     def test_logout(self):
 
-        response = self.client.post('/logout', content_type='application/json')
+        response = self.client.post('/logout', headers={"Authorization": f"Bearer {self.__class__.token}"})
         self.assertEqual(response.status_code, 200)
 
         # print(f"Res: {response.get_json()}")

@@ -1,15 +1,12 @@
 from flask import Flask, render_template, request, jsonify, redirect
-import os, datetime
+import os, datetime, traceback
 import pandas as pd
-import traceback
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
 from flask_jwt_extended import (
     JWTManager, jwt_required, get_jwt, create_access_token,
-    create_refresh_token,
-    get_jwt_identity, set_access_cookies,
-    set_refresh_cookies, unset_jwt_cookies
+    get_jwt_identity, set_access_cookies, unset_jwt_cookies
 )
 
 from werkzeug.utils import secure_filename
@@ -19,8 +16,10 @@ CORS(app)
 
 app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
-app.config["JWT_TOKEN_LOCATION"] = ['cookies']
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(hours=0.005)
+app.config["JWT_TOKEN_LOCATION"] = ['headers']
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(hours=0.5)
+
+UPLOAD_FOLDER = "./datasets"
 
 jwt = JWTManager(app)
 
@@ -44,17 +43,29 @@ def loadDataset(dataset):
         return df
 
 @app.route('/upload')
+@jwt_required()
 def upload():
    return render_template('upload.html')
 	
-@app.route('/uploader', methods = ['GET', 'POST'])
+@app.route('/uploader', methods = ['POST'])
+@jwt_required()
 def upload_file():
    if request.method == 'POST':
-      f = request.files['file']
-      f.save(secure_filename(f.filename))
-      return 'file uploaded successfully'
+      if 'file' in request.files:
+
+         if not os.path.isdir(UPLOAD_FOLDER):
+            os.mkdir(UPLOAD_FOLDER)
+
+         f = request.files['file']
+         if (f):
+            f.save(os.path.join(UPLOAD_FOLDER, secure_filename(f.filename)))
+
+         return {"msg": "file uploaded successfully"}, 200
+      else:
+         return {"msg": "file not found"}, 200
 
 @app.route('/', methods = ['GET'])
+@jwt_required()
 def index():
    if request.method == 'POST':
       return 'post not implemented'
@@ -71,11 +82,11 @@ def index():
 
 @app.route('/datasets/')
 @jwt_required()
-
 def datasets():
     return redirect('/')
 
 @app.route('/datasets/<dataset>')
+@jwt_required()
 def dataset(description = None, head = None, dataset = None):
    if not dataset:
       return jsonify(exception="missing data set")
@@ -119,8 +130,8 @@ def login():
 def refresh_expiring_jwts(response):
     try:
         exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(datetime.timezone.utc)
-        target_timestamp = datetime.timestamp(now + datetime.timedelta(minutes=30))
+        now = datetime.datetime.now(datetime.timezone.utc)
+        target_timestamp = datetime.datetime.timestamp(now + datetime.timedelta(minutes=30))
         if target_timestamp > exp_timestamp:
             access_token = create_access_token(identity=get_jwt_identity())
             set_access_cookies(response, access_token)
@@ -131,6 +142,7 @@ def refresh_expiring_jwts(response):
 
 
 @app.route("/logout", methods=["POST"])
+# @jwt_required()
 def logout():
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
@@ -153,7 +165,9 @@ def test_connect():
    emit('after connect',  {'data':'Lets dance'})
 
 if __name__ == '__main__':
+   app.secret_key = os.urandom(24)
    app.run(debug = True)
+
 
 # if __name__ == '__main__':
 #     socketio.run(app)
