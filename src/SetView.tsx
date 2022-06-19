@@ -25,7 +25,8 @@ interface IDictionary<T> {
 const SetView = (): JSX.Element => {
 
     const [dataSets, setDataSets] = React.useState<string[]>([]);
-    const [dataSet, setDataSet] = React.useState<IDictionary<string> | null>(null);
+    const [dataHead, setDataHead] = React.useState<IDictionary<string> | null>(null);
+    const [dataDesc, setDataDesc] = React.useState<IDictionary<string> | null>(null);
     const [error, setError] = React.useState<string|undefined>();
     const { token } = React.useContext<contextType>(StatusContext);
 
@@ -61,8 +62,9 @@ const SetView = (): JSX.Element => {
     const handleProfile = async (dsName: string) => {
         // console.log("The Values that you wish to edit ", dsName);
 
-        if (dataSet) {
-            setDataSet(null);
+        if (dataHead) {
+            setDataHead(null);
+            setDataDesc(null);
             return;
         }
 
@@ -79,10 +81,16 @@ const SetView = (): JSX.Element => {
         const response = await fetch(url, options);
         const resp = await response?.json();
 
-        // console.log("Resp:", JSON.parse(resp));
+        // console.log("Resp:", resp);
 
-        if (resp)
-            setDataSet(JSON.parse(resp));
+        // console.log("Resp:", JSON.parse(resp));
+        // console.log("Keys:", Object.keys(resp).length);
+
+        if (resp && Object.keys(resp).length === 2) {
+            // console.log("Keys:", Object.keys(resp));
+            setDataHead(JSON.parse(resp['head']));
+            setDataDesc(JSON.parse(resp['desc']));
+        }
     };
 
     return (
@@ -108,7 +116,8 @@ const SetView = (): JSX.Element => {
                         )) }
                     </TableBody>
                 </Table>
-                { dataSet && <ProfileGrid dataSet={dataSet}/> }
+                { dataHead && <ProfileGrid dataSet={dataHead}/> }
+                { dataDesc && <ProfileGrid dataSet={dataDesc}/> }
             </TableContainer>
     )
 

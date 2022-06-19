@@ -93,9 +93,11 @@ def dataset(description = None, head = None, dataset = None):
 
    df = loadDataset(dataset)
    try:
-      # description = df.describe().round(2)
+      description = df.describe().round(2)
+      # print(description)
       head = df.head(5)
-      return jsonify(head.to_json(orient='records'))
+      return jsonify({'head': head.to_json(orient='records'),
+                     'desc': description.to_json(orient='records')})
 
    except Exception as e:
       print(e)
