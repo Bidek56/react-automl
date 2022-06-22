@@ -34,17 +34,22 @@ const Login = ({ setToken }: LoginProps ) => {
             body: JSON.stringify({ user: userRef?.current, pass: passRef?.current }),
         };
 
-        const response = await fetch(url, options);
+        try {
+            const response = await fetch(url, options);
 
-        // console.log(response)
+            // console.log(response);
 
-        const resp = await response.json();
+            const resp = await response.json();
 
-        if(response.ok) {
-            // console.log(resp);
-            setToken(resp["access_token"]);
-        } else {
-            setLoginError(resp["msg"]);
+            if(response.ok) {
+                // console.log(resp);
+                setToken(resp["access_token"]);
+            } else {
+                setLoginError(resp["msg"]);
+            }
+        } catch(err)  {
+            console.log(err);
+            setLoginError(err + ":" + url);
         }
     }
 
