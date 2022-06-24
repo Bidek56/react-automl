@@ -4,9 +4,9 @@ The client of this project was bootstrapped with [Create React App](https://gith
 
 To install MUI with React 18, please `npm i --legacy-peer-deps` until MUI fixes it's support for React 18
 
-### Available client scripts using npm
+### React client
 
-In the project directory, you can run:
+In the main project directory, you can run:
 
 1. #### `npm start`
 
@@ -31,14 +31,18 @@ In the project directory, you can run:
 
     See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `Python server is using Flask and Socket-IO`
-The websocket server is written using Python 3.9
+### Python server
 
-To run it:
-1. `pip install -r pyserver/requirements.txt`
-2. `python pyserver/server.py`
+Python server is using Flask, Socket-IO and Python 3.10
 
-Or
+To run the Python server:
+1. cd to the pyserver dir: `cd pyserver`
+2. Create local virtual env: `python -m venv venv`
+3. Activate local virtual env: `./venv/bin/activate`
+4. Install pip libraries: `pip install -r requirements.txt`
+5. Start the Flask server: `python app.py`
+
+Or start it using nodemon
 
 1. `npm i -g nodemon`
-2. `nodemon --exec python pyserver/server.py`
+2. `nodemon --exec python app.py`
