@@ -1,5 +1,7 @@
-import React from 'react'
-import { Button, TableContainer, Table, TableBody, TableCell, TableHead, TableRow, Paper } from '@mui/material';
+import React from 'react';
+import { styled } from '@mui/material/styles';
+import { Button, TableContainer, Table, TableBody, TableCell, TableHead, TableRow, Paper, Grid, MenuItem } from '@mui/material';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid, GridToolbar, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
@@ -25,15 +27,56 @@ const ProfileGrid: React.FC<{dataSet: IDictionary<string>[]}> = ({dataSet}): JSX
     return <DataGrid autoHeight rows={rows} columns={columns} components={{ Toolbar: GridToolbar }} />;
 }
 
+const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+  }));
+
 const NewDataSet: React.FC<{columns: string[]}> = ({columns}): JSX.Element => {
 
+    const handleChange = (event: SelectChangeEvent) => {
+        // setAge(event.target.value);
+      };
+
     return (
-        <div>
-            <h3>Choose preprocessing options</h3>
-            <h3>Feature Selection</h3>
-            <h3>Null values and unique value variables</h3>
-            <div key="cols">{columns}</div>
-        </div>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <Item><h2>Preprocessing options</h2></Item>
+                </Grid>
+                <Grid item xs={6}>
+                    <Item><h3>Feature Selection</h3></Item>
+                    <Item><h4>Automatic selection (Chi-squared)</h4></Item>
+                    <Item>Number of Features (Chi-squared):</Item>
+                    <Item>Response Variable:{columns}</Item>
+                    <Item><h4>Manual Selection (Chi-squared)</h4></Item>
+                    <Item>New Dataset Name:</Item>
+                    <Item>Variables Selection:{columns}</Item>
+                </Grid>
+                <Grid item xs={6}>
+                    <Item><h3>Null values and unique value variables</h3></Item>
+                    <Item><h4>Drop rows with null values if...</h4>
+                        <Select id="dropna" labelId='dropna' value="all" onChange={handleChange}>
+                            <MenuItem value="all">Null in ALL columns</MenuItem>
+                            <MenuItem value="any">Null in ANY column</MenuItem>
+                            <MenuItem value="no">Never</MenuItem>
+                        </Select>
+                    </Item>
+                    <Item>
+                        <h4>Drop variables with a unique value</h4>
+                        <Select id="dropsame" value="Yes" labelId="dropsame">
+                            <MenuItem value="Yes">Yes</MenuItem>
+                            <MenuItem value="No">No</MenuItem>
+                        </Select>
+                    </Item>
+
+                    <Item>
+                        <Button type="submit">Create New Dataset</Button>
+                    </Item>
+                </Grid>
+            </Grid>
     )
 
 }
@@ -71,7 +114,8 @@ const SetView = (): JSX.Element => {
             if (response.ok) {
                 setDataSets(resp);
             } else {
-                setError(response.statusText + ":" + resp["exception"]);
+                const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
+                setError(response.statusText + excep);
             }
         };
 
