@@ -26,11 +26,12 @@ jwt = JWTManager(app)
 
 socketio = SocketIO(app, cors_allowed_origins=['http://localhost:3000'])
 
-def datasetList():
-    datasets = [x.split('.')[0] for f in ['datasets', 'preprocessed'] for x in os.listdir(f)]
-    extensions = [x.split('.')[1] for f in ['datasets', 'preprocessed'] for x in os.listdir(f)]
-    folders = [f for f in ['datasets', 'preprocessed'] for x in os.listdir(f)]
-    return datasets, extensions, folders
+def getOriginalDatasetList():
+   if os.path.exists(UPLOAD_FOLDER):
+      datasets = [x.split('.')[0] for f in [UPLOAD_FOLDER] for x in os.listdir(f)]
+      return datasets
+   else:
+      return None
 
 # Load Dataset
 def loadDataset(dataset, nrows=None):
@@ -70,14 +71,12 @@ def index():
       return 'post not implemented'
 
    if request.method == 'GET':
-      datasets,_,folders = datasetList()
-      originalds = []
-      featuresds = []
-      for i in range(len(datasets)):
-         if folders[i] == 'datasets': originalds += [datasets[i]]
-         else: featuresds += [datasets[i]]	
+      datasets = getOriginalDatasetList()
 
-      return jsonify(originalds)
+      if datasets:
+         return jsonify(datasets)
+      else:
+         return jsonify(exception="missing datasets directory"), 400
 
 @app.route('/datasets/')
 @jwt_required()

@@ -65,12 +65,13 @@ const SetView = (): JSX.Element => {
 
             // console.log("Resp:", response);
 
+            const resp = await response.json();
+            // console.log(resp);
+
             if (response.ok) {
-                const resp = await response.json();
-                // console.log(resp);
                 setDataSets(resp);
             } else {
-                setError(response.statusText);
+                setError(response.statusText + ":" + resp["exception"]);
             }
         };
 
