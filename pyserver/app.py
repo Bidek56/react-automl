@@ -13,7 +13,7 @@ from sklearn import datasets
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # , resources={r"/*": {"origins": "http://localhost:3000"}})
 
 app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
@@ -131,48 +131,62 @@ def columns(dataset = None):
 @app.route('/datasets/<dataset>/preprocessed_dataset/', methods=['POST'])
 @jwt_required()
 def preprocessed_dataset(dataset):
-    numFeatures = request.form.get('nfeatures')
-    manualFeatures = request.form.getlist('manualfeatures')
-    datasetName = request.form.get('newdataset')
-    response = request.form.get('response')
-    dropsame = request.form.get('dropsame')
-    dropna = request.form.get('dropna')
-    
-    df = loadDataset(dataset)
+   numFeatures = request.json.get('nfeatures')
+   manualFeatures = request.json.get('manualfeatures')
 
-    if dropna == 'all':
-        df = df.dropna(axis=1, how='all')
-    elif dropna == 'any':
-        df.dropna(axis=1, how='any')
-        
-    filename = dataset + '_'
-    try:
-        nf = int(numFeatures)
-        from sklearn.feature_selection import SelectKBest, chi2
-        X = df.drop(str(response), axis=1)
-        y = df[str(response)]
-        kbest = SelectKBest(chi2, k=nf).fit(X,y)
-        mask = kbest.get_support()
-        # List of K best features
-        best_features = []
-        for bool, feature in zip(mask, list(df.columns)):
-            if bool: best_features.append(feature)
-        #Reduced Dataset
-        df = pd.DataFrame(kbest.transform(X),columns=best_features)
-        df.insert(0, str(response), y)
-        
-        filename += numFeatures + '_' + 'NA' + dropna + '_Same' + dropsame + '.csv'
+   # print(f"request.json: {request.json}")
+
+   datasetName = request.json.get('newdataset')
+   response = request.json.get('response')
+   dropsame = request.json.get('dropsame')
+   dropna = request.json.get('dropna')
     
-    except:
-        df = df[manualFeatures]
-        filename += str(datasetName) + '_' + str(response) + '.csv'
-    
-    if dropsame == 'Yes':
-        nunique = df.apply(pd.Series.nunique)
-        cols_to_drop = nunique[nunique == 1].index
-        df = df.drop(cols_to_drop, axis=1)
-    df.to_csv(os.path.join('preprocessed', filename), index=False)
-    return redirect('/datasets/' + filename.split('.')[0])
+   df = loadDataset(dataset)
+
+   if dropna == 'all':
+      df = df.dropna(axis=1, how='all')
+   elif dropna == 'any':
+      df.dropna(axis=1, how='any')
+   
+   filename = dataset + '_'
+   if numFeatures and numFeatures > 0:
+
+      try:
+         nf = int(numFeatures)
+         from sklearn.feature_selection import SelectKBest, chi2
+         X = df.drop(str(response), axis=1)
+         y = df[str(response)]
+         kbest = SelectKBest(chi2, k=nf).fit(X,y)
+         mask = kbest.get_support()
+         # List of K best features
+         best_features = []
+         for bool, feature in zip(mask, list(df.columns)):
+            if bool: 
+               best_features.append(feature)
+               # Reduced Dataset
+               df = pd.DataFrame(kbest.transform(X),columns=best_features)
+               df.insert(0, str(response), y)
+      
+         filename += f"{numFeatures}_{dropna}_{dropsame}.csv"
+
+         # print(f"{filename=}")
+
+      except Exception as e:
+         print(e + traceback.format_exc())
+         return {"exception": f"'{e}'"}, 400
+
+   else:
+      df = df[manualFeatures]
+      filename += f"{datasetName}_{response}.csv"
+   
+   if dropsame:
+      nunique = df.apply(pd.Series.nunique)
+      cols_to_drop = nunique[nunique == 1].index
+      df = df.drop(cols_to_drop, axis=1)
+   
+   df.to_csv(os.path.join('preprocessed', filename), index=False)
+
+   return { "msg": f"Created: {filename}" }
 
 
 @app.errorhandler(500)
