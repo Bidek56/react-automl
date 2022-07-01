@@ -1,3 +1,4 @@
+from typing import List
 from flask import Flask, render_template, request, jsonify, redirect
 import os, datetime, traceback
 import pandas as pd
@@ -20,22 +21,26 @@ app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 app.config["JWT_TOKEN_LOCATION"] = ['headers']
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(hours=0.5)
 
-UPLOAD_FOLDER = "./datasets"
+ORIGINAL_FOLDER = "original"
+PROCESS_FOLDER = "processed"
 
 jwt = JWTManager(app)
 
 socketio = SocketIO(app, cors_allowed_origins=['http://localhost:3000'])
 
-def getOriginalDatasetList():
-   if os.path.exists(UPLOAD_FOLDER):
-      datasets = [x.split('.')[0] for f in [UPLOAD_FOLDER] for x in os.listdir(f)]
-      return datasets
-   else:
-      return None
+def getDatasetList() -> List:
+
+   datasets = []
+
+   for folder in [ ORIGINAL_FOLDER, PROCESS_FOLDER ]:
+      if os.path.exists(folder):
+         datasets.extend( [ f"{folder}/{x}" for f in [folder] for x in os.listdir(f) ] )
+
+   return datasets
 
 # Load Dataset
 def loadDataset(dataset, nrows=None):
-   fullPath = os.path.join(UPLOAD_FOLDER, dataset + ".csv")
+   fullPath = os.path.join(ORIGINAL_FOLDER, dataset + ".csv")
 
    if (os.path.exists(fullPath)):
       return pd.read_csv(fullPath, nrows=nrows)
@@ -53,12 +58,12 @@ def upload_file():
    if request.method == 'POST':
       if 'file' in request.files:
 
-         if not os.path.isdir(UPLOAD_FOLDER):
-            os.mkdir(UPLOAD_FOLDER)
+         if not os.path.isdir(ORIGINAL_FOLDER):
+            os.mkdir(ORIGINAL_FOLDER)
 
          f = request.files['file']
          if (f):
-            f.save(os.path.join(UPLOAD_FOLDER, secure_filename(f.filename)))
+            f.save(os.path.join(ORIGINAL_FOLDER, secure_filename(f.filename)))
 
          return {"msg": "file uploaded successfully"}, 200
       else:
@@ -71,12 +76,9 @@ def index():
       return 'post not implemented'
 
    if request.method == 'GET':
-      datasets = getOriginalDatasetList()
+      datasets = getDatasetList()
 
-      if datasets:
-         return jsonify(datasets)
-      else:
-         return jsonify(exception="missing datasets directory"), 400
+      return jsonify(datasets)
 
 @app.route('/datasets/')
 @jwt_required()
@@ -131,11 +133,11 @@ def columns(dataset = None):
 @app.route('/datasets/<dataset>/preprocessed_dataset/', methods=['POST'])
 @jwt_required()
 def preprocessed_dataset(dataset):
-   numFeatures = request.json.get('nfeatures')
-   manualFeatures = request.json.get('manualfeatures')
 
    # print(f"request.json: {request.json}")
 
+   numFeatures = request.json.get('nfeatures')
+   manualFeatures = request.json.get('manualfeatures')
    datasetName = request.json.get('newdataset')
    response = request.json.get('response')
    dropsame = request.json.get('dropsame')
@@ -184,7 +186,7 @@ def preprocessed_dataset(dataset):
       cols_to_drop = nunique[nunique == 1].index
       df = df.drop(cols_to_drop, axis=1)
    
-   df.to_csv(os.path.join('preprocessed', filename), index=False)
+   df.to_csv(os.path.join(PROCESS_FOLDER, filename), index=False)
 
    return { "msg": f"Created: {filename}" }
 

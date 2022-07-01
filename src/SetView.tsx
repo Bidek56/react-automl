@@ -91,6 +91,13 @@ const NewDataSet: React.FC<{selectedSet: string|null, columns: string[]}> = ({ s
     }
 
     const createClick = async () => {
+
+        if (!newSetName) {
+            setMessage(undefined);
+            setError("New data set name is not set");
+            return
+        }
+
         setError(undefined);
         setMessage(undefined);
 
@@ -123,8 +130,7 @@ const NewDataSet: React.FC<{selectedSet: string|null, columns: string[]}> = ({ s
             const resp = await response.json();
 
             if(response.ok) {
-                console.log(resp);
-                // setToken(resp["access_token"]);
+                // console.log(resp);
                 const message = resp?.msg !== undefined && resp["msg"];
                 setMessage(message);
             } else {
@@ -321,7 +327,7 @@ const SetView = (): JSX.Element => {
                     <Table sx={{minWidth: 650}}>
                         <TableHead sx={{backgroundColor: '#e3f2fd'}}>
                             <TableRow>
-                                <TableCell>Original data set</TableCell>
+                                <TableCell>Datasets</TableCell>
                                 <TableCell align="left">Action</TableCell>
                                 <TableCell align="left">Action</TableCell>
                             </TableRow>
