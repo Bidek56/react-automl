@@ -5,6 +5,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid, GridToolbar, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import Delete from '@mui/icons-material/Delete';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -225,33 +226,33 @@ const SetView = (): JSX.Element => {
     // console.log("Token:", token);
 
     React.useEffect(() => {
-        const fetchDatasets = async () => {
+        fetchDatasets();
+    }, [token]);
 
-            const url = `http://${window.location.hostname}:5000/`;
-            const options = {
-                method: "GET",
-                headers: {
-                    Authorization: 'Bearer ' + token
-                }
-            };
+    const fetchDatasets = async () => {
 
-            const response = await fetch(url, options);
-
-            // console.log("Resp:", response);
-
-            const resp = await response.json();
-            // console.log(resp);
-
-            if (response.ok) {
-                setDataSets(resp);
-            } else {
-                const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
-                setError(response.statusText + excep);
+        const url = `http://${window.location.hostname}:5000/`;
+        const options = {
+            method: "GET",
+            headers: {
+                Authorization: 'Bearer ' + token
             }
         };
 
-        fetchDatasets();
-    }, [token]);
+        const response = await fetch(url, options);
+
+        // console.log("Resp:", response);
+
+        const resp = await response.json();
+        // console.log(resp);
+
+        if (response.ok) {
+            setDataSets(resp);
+        } else {
+            const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
+            setError(response.statusText + excep);
+        }
+    };
 
     const handleProfile = async (dsName: string) => {
         // console.log("The Values that you wish to edit ", dsName);
@@ -288,7 +289,7 @@ const SetView = (): JSX.Element => {
         }
     };
 
-    const handleColumns = async (dsName: string) => {
+    const handleNewSet = async (dsName: string) => {
         // console.log("Columns action:", dsName);
 
         if (dataCols) {
@@ -319,7 +320,35 @@ const SetView = (): JSX.Element => {
         if (resp?.columns !== undefined) {
             setDataCols(JSON.parse(resp['columns']));
         }
+
+        fetchDatasets();
     };
+
+    const handleDelete = async (dsName: string) => {
+        // console.log("Delete: " + dsName)
+
+        const url = `http://${window.location.hostname}:5000/datasets/${dsName}/delete`;
+        const options = {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json;charset=UTF-8",
+                Authorization: 'Bearer ' + token
+            }
+        };
+
+        const response = await fetch(url, options);
+        const resp = await response?.json();
+
+        // console.log("Resp:", resp);
+
+        if (response.ok) {
+            fetchDatasets();
+        } else {
+            const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
+            setError(response.statusText + excep);
+        }
+    }
 
     return (
             error ? <div>{error}</div> :
@@ -327,9 +356,10 @@ const SetView = (): JSX.Element => {
                     <Table sx={{minWidth: 650}}>
                         <TableHead sx={{backgroundColor: '#e3f2fd'}}>
                             <TableRow>
-                                <TableCell>Datasets</TableCell>
-                                <TableCell align="left">Action</TableCell>
-                                <TableCell align="left">Action</TableCell>
+                                <TableCell>Dataset Path and Name</TableCell>
+                                <TableCell align="left">Delete</TableCell>
+                                <TableCell align="left">Profile</TableCell>
+                                <TableCell align="left">New data set</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -337,10 +367,13 @@ const SetView = (): JSX.Element => {
                                 <TableRow key={row}>
                                     <TableCell component="th" scope="row">{row}</TableCell>
                                     <TableCell align="left">
-                                        <Button aria-label="edit" onClick={() => handleProfile(row)} startIcon={<TableChartIcon />}>Profile</Button>
+                                        <Delete onClick={() => handleDelete(row)} />
                                     </TableCell>
                                     <TableCell align="left">
-                                        <Button aria-label="" onClick={() => handleColumns(row)} startIcon={<CreateNewFolderIcon />}>New data set</Button>
+                                        <TableChartIcon onClick={() => handleProfile(row)} />
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <CreateNewFolderIcon onClick={() => handleNewSet(row)} />
                                     </TableCell>
                                 </TableRow>
                             )) }

@@ -39,18 +39,15 @@ def getDatasetList() -> List:
    return datasets
 
 # Load Dataset
-def loadDataset(dataset, nrows=None):
-   fullPath = os.path.join(ORIGINAL_FOLDER, dataset + ".csv")
+def loadDataset(source, dataset, nrows=None):
+   fullPath = os.path.join(source, dataset)
+
+   # print(f"Full path: {fullPath}")
 
    if (os.path.exists(fullPath)):
       return pd.read_csv(fullPath, nrows=nrows)
    else:
       return None
-
-@app.route('/upload')
-@jwt_required()
-def upload():
-   return render_template('upload.html')
 	
 @app.route('/uploader', methods = ['POST'])
 @jwt_required()
@@ -69,6 +66,21 @@ def upload_file():
       else:
          return {"msg": "file not found"}, 200
 
+@app.route('/datasets/<source>/<dataset>/delete')
+@jwt_required()
+def delete(source = None, dataset = None):
+   if not dataset:
+      return jsonify(exception="missing data set")
+
+   fullPath = os.path.join(source, dataset)
+
+   try:
+      os.remove(fullPath)
+      return jsonify({"msg": "delete successful"})
+   except Exception as e:
+      print(e)
+      return jsonify(exception=traceback.format_exc())
+
 @app.route('/', methods = ['GET'])
 @jwt_required()
 def index():
@@ -85,15 +97,15 @@ def index():
 def datasets():
     return redirect('/')
 
-@app.route('/datasets/<dataset>')
+@app.route('/datasets/<source>/<dataset>')
 @jwt_required()
-def dataset(dataset = None):
+def dataset(source = None, dataset = None):
    if not dataset:
       return jsonify(exception="missing data set")
 
-   df = loadDataset(dataset)
+   df = loadDataset(source, dataset)
 
-   # print(f"df: {df}")
+   # print(f"DF: {df}")
 
    if df is None:
       return jsonify(exception=f"error reading: {dataset}")
@@ -109,15 +121,15 @@ def dataset(dataset = None):
       print(e)
       return jsonify(exception=traceback.format_exc())
 
-@app.route('/datasets/<dataset>/columns')
+@app.route('/datasets/<source>/<dataset>/columns')
 @jwt_required()
-def columns(dataset = None):
+def columns(source = None, dataset = None):
    if not dataset:
       return jsonify(exception="missing data set")
 
-   df = loadDataset(dataset, nrows=1)
+   df = loadDataset(source, dataset, nrows=1)
 
-   print(f"df: {df}")
+   # print(f"df: {df}")
 
    if df is None:
       return jsonify(exception=f"error reading: {dataset}")
@@ -130,9 +142,9 @@ def columns(dataset = None):
       print(e)
       return jsonify(exception=traceback.format_exc())
 
-@app.route('/datasets/<dataset>/preprocessed_dataset/', methods=['POST'])
+@app.route('/datasets/<source>/<dataset>/preprocessed_dataset/', methods=['POST'])
 @jwt_required()
-def preprocessed_dataset(dataset):
+def preprocessed_dataset(source: str = None, dataset: str = None):
 
    # print(f"request.json: {request.json}")
 
@@ -143,14 +155,14 @@ def preprocessed_dataset(dataset):
    dropsame = request.json.get('dropsame')
    dropna = request.json.get('dropna')
     
-   df = loadDataset(dataset)
+   df = loadDataset(source, dataset)
 
    if dropna == 'all':
       df = df.dropna(axis=1, how='all')
    elif dropna == 'any':
       df.dropna(axis=1, how='any')
    
-   filename = dataset + '_'
+   filename = dataset.replace(".csv", "") + '_'
    if numFeatures and numFeatures > 0:
 
       try:
@@ -237,17 +249,6 @@ def logout():
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
     return response
-
-@app.route('/profile')
-@jwt_required()
-def my_profile():
-   response_body = {
-      "name": "Nagato",
-      "about" :"Hello! I'm a full stack developer that loves python and javascript"
-   }
-
-   return response_body
-
 
 @socketio.on('connect')
 def test_connect():
