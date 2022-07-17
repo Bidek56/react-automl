@@ -46,10 +46,10 @@ class TestApp(unittest.TestCase):
         # print(response.get_json())
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json(), ['sample', 'boston_house_prices'])
+        self.assertEqual(response.get_json(), ['original/sample.csv', 'original/boston_house_prices.csv'])
 
     def test_upload_csv(self):
-        folder = "datasets"
+        folder = "original"
         file = "sample.csv"
         data = dict(file= (open(os.path.join( folder, file ), 'rb'), file) )
 
@@ -64,7 +64,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.get_json(), expected)
 
     def test_dataset(self):
-        response = self.client.get('/datasets/sample', headers={"Authorization": f"Bearer {self.__class__.token}"})
+        response = self.client.get('/datasets/original/sample.csv', headers={"Authorization": f"Bearer {self.__class__.token}"})
         # print(f"Res: {response.text}")
         # print(f"Res: {response.get_json()}")
 
