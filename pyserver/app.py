@@ -1,5 +1,5 @@
 from typing import List
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, request, jsonify, redirect
 import os, datetime, traceback
 import pandas as pd
 from flask_socketio import SocketIO, emit
@@ -66,7 +66,7 @@ def upload_file():
       else:
          return {"msg": "file not found"}, 200
 
-@app.route('/datasets/<source>/<dataset>/delete')
+@app.route('/datasets/<source>/<dataset>/delete', methods = ['GET'])
 @jwt_required()
 def delete(source = None, dataset = None):
    if not dataset:
@@ -78,8 +78,31 @@ def delete(source = None, dataset = None):
       os.remove(fullPath)
       return jsonify({"msg": "delete successful"})
    except Exception as e:
-      print(e)
-      return jsonify(exception=traceback.format_exc())
+      # print(e)
+      return jsonify(exception=traceback.format_exc()), 404
+
+@app.route('/datasets/<source>/<dataset>/graph', methods = ['GET'])
+@jwt_required()
+def graph(source = None, dataset = None):
+   if not dataset:
+      return jsonify(exception="missing data set")
+
+   df = loadDataset(source, dataset)
+
+   if df is None:
+      return jsonify(exception=f"error reading: {dataset}"), 404
+
+   print(f"DF:\n{df}")
+
+   df.plot.bar()
+
+   try:
+      # os.remove(fullPath)
+      return jsonify({"msg": "graph successful"})
+   except Exception as e:
+      # print(e)
+      return jsonify(exception=traceback.format_exc()), 404
+
 
 @app.route('/', methods = ['GET'])
 @jwt_required()
@@ -201,7 +224,6 @@ def preprocessed_dataset(source: str = None, dataset: str = None):
    df.to_csv(os.path.join(PROCESS_FOLDER, filename), index=False)
 
    return { "msg": f"Created: {filename}" }
-
 
 @app.errorhandler(500)
 def internal_error(e):

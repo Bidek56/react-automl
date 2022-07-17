@@ -85,6 +85,25 @@ class TestApp(unittest.TestCase):
         expected = {"msg": "logout successful"}
         self.assertEqual(response.get_json(), expected)
 
+    def test_delete(self):
+        response = self.client.get('/datasets/original/foo/delete', headers={"Authorization": f"Bearer {self.__class__.token}"})
+
+        self.assertEqual(response.status_code, 404)
+        # print(f"Res: {response.status_code}")
+        # print(f"Res: {response.get_json()}")
+
+        res = response.get_json()
+        self.assertIn("exception", res)
+
+    def test_graph(self):
+        response = self.client.get('/datasets/original/sample.csv/graph', headers={"Authorization": f"Bearer {self.__class__.token}"})
+
+        # self.assertEqual(response.status_code, 404)
+        # print(f"Res: {response.status_code}")
+        print(f"Res: {response.get_json()}")
+
+        # res = response.get_json()
+        # self.assertIn("exception", res)
 
 @unittest.skip("demonstrating skipping")
 class TestStringMethods(unittest.TestCase):
