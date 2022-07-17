@@ -225,34 +225,36 @@ const SetView = (): JSX.Element => {
 
     // console.log("Token:", token);
 
+    const fetchDatasets = React.useCallback(
+        async () => {
+
+            const url = `http://${window.location.hostname}:5000/`;
+            const options = {
+                method: "GET",
+                headers: {
+                    Authorization: 'Bearer ' + token
+                }
+            };
+
+            const response = await fetch(url, options);
+
+            // console.log("Resp:", response);
+
+            const resp = await response.json();
+            // console.log(resp);
+
+            if (response.ok) {
+                setDataSets(resp);
+            } else {
+                const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
+                setError(response.statusText + excep);
+            }
+        }, [token]
+    );
+
     React.useEffect(() => {
         fetchDatasets();
-    }, [token]);
-
-    const fetchDatasets = async () => {
-
-        const url = `http://${window.location.hostname}:5000/`;
-        const options = {
-            method: "GET",
-            headers: {
-                Authorization: 'Bearer ' + token
-            }
-        };
-
-        const response = await fetch(url, options);
-
-        // console.log("Resp:", response);
-
-        const resp = await response.json();
-        // console.log(resp);
-
-        if (response.ok) {
-            setDataSets(resp);
-        } else {
-            const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
-            setError(response.statusText + excep);
-        }
-    };
+    }, [fetchDatasets]);
 
     const handleProfile = async (dsName: string) => {
         // console.log("The Values that you wish to edit ", dsName);
