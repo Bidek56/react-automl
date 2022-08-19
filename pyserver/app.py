@@ -1,6 +1,6 @@
 from typing import List
 from flask import Flask, request, jsonify, redirect
-import os, datetime, traceback
+import os, io, datetime, traceback, base64
 import pandas as pd
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
@@ -10,6 +10,10 @@ from flask_jwt_extended import (
     get_jwt_identity, set_access_cookies, unset_jwt_cookies
 )
 from sklearn import datasets
+
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 from werkzeug.utils import secure_filename
 
@@ -81,6 +85,24 @@ def delete(source = None, dataset = None):
       # print(e)
       return jsonify(exception=traceback.format_exc()), 404
 
+
+def create_figure(df: pd.DataFrame):
+   fig = Figure()
+   ax = fig.subplots()
+
+   # fig, ax = plt.subplots(figsize = (6,4))
+   fig.patch.set_facecolor('#E8E5DA')
+
+   x = df.a
+   y = df.b
+
+   ax.bar(x, y, color = "#304C89")
+
+   # plt.xticks(rotation = 30, size = 5)
+   # plt.ylabel("Expected Clean Sheets", size = 5)
+
+   return fig
+
 @app.route('/datasets/<source>/<dataset>/graph', methods = ['GET'])
 @jwt_required()
 def graph(source = None, dataset = None):
@@ -94,15 +116,18 @@ def graph(source = None, dataset = None):
 
    print(f"DF:\n{df}")
 
-   df.plot.bar()
+   fig = create_figure(df)
+   output = io.BytesIO()
+   FigureCanvas(fig).print_png(output)
+
+   imgByteArr = base64.encodebytes(output.getvalue()).decode('ascii')
 
    try:
       # os.remove(fullPath)
-      return jsonify({"msg": "graph successful"})
+      return jsonify({"msg": "graph successful", "imageBytes": imgByteArr})
    except Exception as e:
       # print(e)
       return jsonify(exception=traceback.format_exc()), 404
-
 
 @app.route('/', methods = ['GET'])
 @jwt_required()

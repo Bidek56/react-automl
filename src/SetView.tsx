@@ -5,6 +5,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid, GridToolbar, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import Delete from '@mui/icons-material/Delete';
 
 import List from '@mui/material/List';
@@ -217,6 +218,7 @@ const SetView = (): JSX.Element => {
     const [dataHead, setDataHead] = React.useState<IDictionary<string>[] | null>(null);
     const [dataDesc, setDataDesc] = React.useState<IDictionary<string>[] | null>(null);
     const [dataCols, setDataCols] = React.useState<string[] | null>(null);
+    const [barPlot, setBarPlot] = React.useState<string | null>(null);
 
     const [selectedDS, setSelectedDS] = React.useState<string | null>(null);
 
@@ -291,7 +293,7 @@ const SetView = (): JSX.Element => {
         }
     };
 
-    const handleNewSet = async (dsName: string) => {
+    const handleFeSet = async (dsName: string) => {
         // console.log("Columns action:", dsName);
 
         if (dataCols) {
@@ -324,6 +326,46 @@ const SetView = (): JSX.Element => {
         }
 
         fetchDatasets();
+    };
+
+    const handlePlot = async (dsName: string) => {
+        // console.log("Columns action:", dsName);
+
+        if (barPlot) {
+            setDataHead(null);
+            setDataDesc(null);
+            setDataCols(null);
+            setSelectedDS(null);
+            setBarPlot(null);
+            return;
+        }
+
+        setSelectedDS(dsName);
+
+        const url = `http://${window.location.hostname}:5000/datasets/${dsName}/graph`;
+        const options = {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json;charset=UTF-8",
+                Authorization: 'Bearer ' + token
+            }
+        };
+
+        const response = await fetch(url, options);
+        const resp = await response?.json();
+
+        // console.log("Resp:", resp);
+
+        if (response.ok) {
+            if (resp?.imageBytes !== undefined) {
+                setBarPlot(resp?.imageBytes);
+            }
+        } else {
+            const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
+            setError(response.statusText + excep);
+        }
+
     };
 
     const handleDelete = async (dsName: string) => {
@@ -361,7 +403,8 @@ const SetView = (): JSX.Element => {
                                 <TableCell>Dataset Path and Name</TableCell>
                                 <TableCell align="left">Delete</TableCell>
                                 <TableCell align="left">Profile</TableCell>
-                                <TableCell align="left">New data set</TableCell>
+                                <TableCell align="left">FE data set</TableCell>
+                                <TableCell align="left">Plot</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -375,7 +418,10 @@ const SetView = (): JSX.Element => {
                                         <TableChartIcon onClick={() => handleProfile(row)} />
                                     </TableCell>
                                     <TableCell align="left">
-                                        <CreateNewFolderIcon onClick={() => handleNewSet(row)} />
+                                        <CreateNewFolderIcon onClick={() => handleFeSet(row)} />
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <AutoGraphIcon onClick={() => handlePlot(row)} />
                                     </TableCell>
                                 </TableRow>
                             )) }
@@ -384,6 +430,7 @@ const SetView = (): JSX.Element => {
                     { dataHead && <ProfileGrid dataSet={dataHead}/> }
                     { dataDesc && <ProfileGrid dataSet={dataDesc}/> }
                     { dataCols && selectedDS && <NewDataSet selectedSet={selectedDS} columns={dataCols}/> }
+                    { barPlot && <img src={`data:image/png;base64,${barPlot}`}/>}
                 </TableContainer>
     )
 
