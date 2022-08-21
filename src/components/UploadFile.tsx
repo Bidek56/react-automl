@@ -2,7 +2,7 @@ import React from 'react'
 import {useDropzone} from 'react-dropzone'
 import { Alert } from '@mui/material';
 import styled from 'styled-components';
-import { StatusContext, contextType } from './StatusContext';
+import { StatusContext, contextType } from '../StatusContext';
 
 const getColor = (props:any) => {
   if (props.isDragAccept) {

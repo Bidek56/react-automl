@@ -9,7 +9,6 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, get_jwt, create_access_token,
     get_jwt_identity, set_access_cookies, unset_jwt_cookies
 )
-from sklearn import datasets
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas

@@ -1,9 +1,9 @@
 import React from 'react'
 import { StatusContext } from './StatusContext';
-import NavBar from './NavBar'
-import Login from './Login'
-import UploadFile from './UploadFile'
-import SetView from './SetView'
+import NavBar from './components/NavBar'
+import Login from './components/Login'
+import UploadFile from './components/UploadFile'
+import SetView from './components/SetView'
 
 import useToken from './useToken'
 
