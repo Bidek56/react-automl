@@ -85,22 +85,18 @@ def delete(source = None, dataset = None):
       # print(e)
       return jsonify(exception=traceback.format_exc()), 404
 
-
 def create_figure(df: pd.DataFrame):
    fig = Figure()
-   ax = fig.subplots()
+   ax = fig.subplots(len(df.columns))
 
-   # fig, ax = plt.subplots(figsize = (6,4))
+   fig.suptitle('Vertically stacked subplots')
    fig.patch.set_facecolor('#E8E5DA')
 
-   x = df.a
-   y = df.b
+   for ind, column in enumerate(df.columns):
+      ax[ind].set_title(f'Histogram for column:{column}')
+      ax[ind].hist(df[column], color = "#304C89")
 
-   ax.bar(x, y, color = "#304C89")
-
-   # plt.xticks(rotation = 30, size = 5)
-   # plt.ylabel("Expected Clean Sheets", size = 5)
-
+   fig.tight_layout()
    return fig
 
 @app.route('/datasets/<source>/<dataset>/graph', methods = ['GET'])
@@ -114,7 +110,7 @@ def graph(source = None, dataset = None):
    if df is None:
       return jsonify(exception=f"error reading: {dataset}"), 404
 
-   print(f"DF:\n{df}")
+   # print(f"DF:\n{df}")
 
    fig = create_figure(df)
    output = io.BytesIO()
@@ -123,7 +119,6 @@ def graph(source = None, dataset = None):
    imgByteArr = base64.encodebytes(output.getvalue()).decode('ascii')
 
    try:
-      # os.remove(fullPath)
       return jsonify({"msg": "graph successful", "imageBytes": imgByteArr})
    except Exception as e:
       # print(e)
@@ -272,7 +267,6 @@ def login():
    set_access_cookies(response, access_token)
    return response
 
-
 # Using an `after_request` callback, we refresh any token that is within 30
 # minutes of expiring. Change the timedeltas to match the needs of your application.
 @app.after_request
@@ -288,7 +282,6 @@ def refresh_expiring_jwts(response):
     except (RuntimeError, KeyError):
         # Case where there is not a valid JWT. Just return the original response
         return response
-
 
 @app.route("/logout", methods=["POST"])
 # @jwt_required()

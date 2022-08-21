@@ -6,6 +6,7 @@ import { DataGrid, GridToolbar, GridRowsProp, GridColDef } from '@mui/x-data-gri
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
 import Delete from '@mui/icons-material/Delete';
 
 import List from '@mui/material/List';
@@ -36,6 +37,10 @@ const ProfileGrid: React.FC<{dataSet: IDictionary<string>[]}> = ({dataSet}): JSX
     return <DataGrid autoHeight rows={rows} columns={columns} components={{ Toolbar: GridToolbar }} />;
 }
 
+const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> = ({ selectedSet, columns}): JSX.Element => {
+    return <div>Not implemented yet</div>
+}
+
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
@@ -44,11 +49,11 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
   }));
 
-const NewDataSet: React.FC<{selectedSet: string|null, columns: string[]}> = ({ selectedSet, columns}): JSX.Element => {
+const NewDataSet: React.FC<{selectedSet: string|null, columns: string[] | null}> = ({ selectedSet, columns}): JSX.Element => {
 
     const [newSetName, setNewSetName] = React.useState<string|undefined>();
     const [featureCount, setFeatureCount] = React.useState<number|undefined>();
-    const [responseVar, setResponseVar] = React.useState<string>(columns[0]);
+    const [responseVar, setResponseVar] = React.useState<string|undefined>(columns ? columns[0] : undefined);
     const [dropNull, setDropNull] = React.useState<string>("all");
     const [dropUnique, setDropUnique] = React.useState<boolean>(true);
 
@@ -157,7 +162,7 @@ const NewDataSet: React.FC<{selectedSet: string|null, columns: string[]}> = ({ s
                     <Item>
                     Response Variable:
                         <Select id="dropna" labelId='dropna' value={responseVar} onChange={selectResponseChange} size="small">
-                            { columns.map( (c, index) => {
+                            { columns && columns?.map( (c, index) => {
                                 return <MenuItem key={index} value={c}>{c}</MenuItem>;
                             })}
                         </Select>
@@ -165,7 +170,7 @@ const NewDataSet: React.FC<{selectedSet: string|null, columns: string[]}> = ({ s
                     </Item>
                     <Item>or Manual Variables Selection:
                         <List sx={{ width: '100%', maxWidth: 160, bgcolor: 'background.paper' }}>
-                            {columns.map((value) => {
+                            {columns && columns.map((value) => {
                                 const labelId = `checkbox-list-label-${value}`;
 
                                 return (
@@ -219,6 +224,7 @@ const SetView = (): JSX.Element => {
     const [dataDesc, setDataDesc] = React.useState<IDictionary<string>[] | null>(null);
     const [dataCols, setDataCols] = React.useState<string[] | null>(null);
     const [barPlot, setBarPlot] = React.useState<string | null>(null);
+    const [modelTraining, setModelTraining] = React.useState<boolean | null>(null);
 
     const [selectedDS, setSelectedDS] = React.useState<string | null>(null);
 
@@ -258,13 +264,21 @@ const SetView = (): JSX.Element => {
         fetchDatasets();
     }, [fetchDatasets]);
 
+
+    const resetState = () => {
+        setDataHead(null);
+        setDataDesc(null);
+        setDataCols(null);
+        setSelectedDS(null);
+        setBarPlot(null);
+        setModelTraining(null);
+    }
+
     const handleProfile = async (dsName: string) => {
         // console.log("The Values that you wish to edit ", dsName);
 
         if (dataHead) {
-            setDataHead(null);
-            setDataDesc(null);
-            setDataCols(null);
+            resetState();
             return;
         }
 
@@ -297,10 +311,7 @@ const SetView = (): JSX.Element => {
         // console.log("Columns action:", dsName);
 
         if (dataCols) {
-            setDataHead(null);
-            setDataDesc(null);
-            setDataCols(null);
-            setSelectedDS(null);
+            resetState();
             return;
         }
 
@@ -332,11 +343,7 @@ const SetView = (): JSX.Element => {
         // console.log("Columns action:", dsName);
 
         if (barPlot) {
-            setDataHead(null);
-            setDataDesc(null);
-            setDataCols(null);
-            setSelectedDS(null);
-            setBarPlot(null);
+            resetState();
             return;
         }
 
@@ -394,6 +401,39 @@ const SetView = (): JSX.Element => {
         }
     }
 
+    const handleModel = async (dsName: string) => {
+        // console.log("Delete: " + dsName)
+
+        if (modelTraining) {
+            resetState();
+            return;            
+        }
+
+        setModelTraining(true);
+
+        // const url = `http://${window.location.hostname}:5000/datasets/${dsName}/delete`;
+        // const options = {
+        //     method: "GET",
+        //     headers: {
+        //         Accept: "application/json",
+        //         "Content-Type": "application/json;charset=UTF-8",
+        //         Authorization: 'Bearer ' + token
+        //     }
+        // };
+
+        // const response = await fetch(url, options);
+        // const resp = await response?.json();
+
+        // // console.log("Resp:", resp);
+
+        // if (response.ok) {
+        //     fetchDatasets();
+        // } else {
+        //     const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
+        //     setError(response.statusText + excep);
+        // }
+    }
+
     return (
             error ? <div>{error}</div> :
                 <TableContainer component={Paper}>
@@ -401,27 +441,31 @@ const SetView = (): JSX.Element => {
                         <TableHead sx={{backgroundColor: '#e3f2fd'}}>
                             <TableRow>
                                 <TableCell>Dataset Path and Name</TableCell>
-                                <TableCell align="left">Delete</TableCell>
-                                <TableCell align="left">Profile</TableCell>
-                                <TableCell align="left">FE data set</TableCell>
-                                <TableCell align="left">Plot</TableCell>
+                                <TableCell>Delete</TableCell>
+                                <TableCell>Profile</TableCell>
+                                <TableCell>FE data set</TableCell>
+                                <TableCell>Plot</TableCell>
+                                <TableCell>Model Training</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             { dataSets.map(row => (
                                 <TableRow key={row}>
                                     <TableCell component="th" scope="row">{row}</TableCell>
-                                    <TableCell align="left">
+                                    <TableCell>
                                         <Delete onClick={() => handleDelete(row)} />
                                     </TableCell>
-                                    <TableCell align="left">
+                                    <TableCell>
                                         <TableChartIcon onClick={() => handleProfile(row)} />
                                     </TableCell>
-                                    <TableCell align="left">
+                                    <TableCell>
                                         <CreateNewFolderIcon onClick={() => handleFeSet(row)} />
                                     </TableCell>
-                                    <TableCell align="left">
+                                    <TableCell>
                                         <AutoGraphIcon onClick={() => handlePlot(row)} />
+                                    </TableCell>
+                                    <TableCell>
+                                        <ModelTrainingIcon onClick={() => handleModel(row)} />
                                     </TableCell>
                                 </TableRow>
                             )) }
@@ -430,7 +474,8 @@ const SetView = (): JSX.Element => {
                     { dataHead && <ProfileGrid dataSet={dataHead}/> }
                     { dataDesc && <ProfileGrid dataSet={dataDesc}/> }
                     { dataCols && selectedDS && <NewDataSet selectedSet={selectedDS} columns={dataCols}/> }
-                    { barPlot && <img src={`data:image/png;base64,${barPlot}`}/>}
+                    { barPlot && <img src={`data:image/png;base64,${barPlot}`} alt="bar plot"/>}
+                    { modelTraining && <ModelGrid selectedSet={selectedDS} columns={dataCols}/>}
                 </TableContainer>
     )
 
