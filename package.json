@@ -28,6 +28,7 @@
     "@typescript-eslint/parser": "^5.34.0",
     "eslint": "^8.22.0",
     "eslint-config-prettier": "^8.5.0",
+    "msw": "^0.45.0",
     "react-scripts": "^5.0.1",
     "typescript": "^4.7.4"
   },
