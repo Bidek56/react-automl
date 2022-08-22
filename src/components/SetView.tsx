@@ -23,6 +23,7 @@ const ProfileGrid: React.FC<{dataSet: IDictionary<string>[]}> = ({dataSet}): JSX
         return { field: c, headerName: c, width: 150 };
     });
 
+    // eslint-disable-next-line
     const rows: GridRowsProp[] = Object.entries(dataSet).map(([key, value]:[string, any]) => {
         return { id: key, ...value };
     });
@@ -30,6 +31,7 @@ const ProfileGrid: React.FC<{dataSet: IDictionary<string>[]}> = ({dataSet}): JSX
     return <DataGrid autoHeight rows={rows} columns={columns} components={{ Toolbar: GridToolbar }} />;
 }
 
+// eslint-disable-next-line
 const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> = ({ selectedSet, columns}): JSX.Element => {
     return <div>Not implemented yet</div>
 }
@@ -219,7 +221,7 @@ const SetView = (): JSX.Element => {
     }
 
     const handleModel = async (dsName: string) => {
-        // console.log("Delete: " + dsName)
+        console.log("Model: " + dsName)
 
         if (modelTraining) {
             resetState();

@@ -9,7 +9,6 @@ import useToken from './useToken'
 
 const App = () => {
 
-    const [socket] = React.useState<any|null>(null);
     const [running, setRunning] = React.useState<boolean>(false)
     const [userCount, setUserCount] = React.useState<number>(0)
     const [completedCount, setCompletedCount] = React.useState<number>(0)
@@ -17,11 +16,11 @@ const App = () => {
 
     const { token, removeToken, setToken } = useToken();
 
-    const statusValue = React.useMemo(() => ({ token, socket, running, setRunning, 
+    const statusValue = React.useMemo(() => ({ token, running, setRunning, 
                                                userCount, setUserCount,
                                                completedCount, setCompletedCount,
                                                log, setLog
-                                            }), [token, socket, running, setRunning, userCount, setUserCount, completedCount, setCompletedCount, log, setLog, ]);
+                                            }), [token, running, setRunning, userCount, setUserCount, completedCount, setCompletedCount, log, setLog, ]);
 
     const logout = async () => {
 

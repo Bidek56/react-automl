@@ -3,4 +3,5 @@ import './index.css';
 import App from './App';
 
 const container = document.getElementById('root');
-createRoot(container!).render(<App/>);
+if (container)
+    createRoot(container).render(<App/>);

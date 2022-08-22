@@ -4,7 +4,13 @@ import { Alert } from '@mui/material';
 import styled from 'styled-components';
 import { StatusContext, contextType } from '../StatusContext';
 
-const getColor = (props:any) => {
+interface IDiv {
+  isDragActive: boolean,
+  isDragAccept: boolean,
+  isDragReject: boolean
+}
+
+const getColor = (props:IDiv) => {
   if (props.isDragAccept) {
       return '#00e676';
   }
@@ -17,7 +23,7 @@ const getColor = (props:any) => {
   return '#eeeeee';
 }
 
-const Container = styled.div`
+const Container = styled.div<IDiv>`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -63,20 +69,19 @@ const UploadFile = () : JSX.Element => {
     const resp = await response?.json();
     
     // console.log("Resp:", resp);
+    // if (resp["msg"] === "file uploaded successfully")
 
-    if (resp["msg"] === "file uploaded successfully") {
-
-    } else if (resp["msg"] === "file not found") {
+    if (resp["msg"] === "file not found") {
       setError(resp["msg"]);
     }
   }
   
-  const onDrop = (acceptedFiles: File[]) => {  
+  const onDrop = React.useCallback((acceptedFiles: File[]) => { 
     // Do something with the files
     acceptedFiles.forEach((file: File) => {
       upload(file);
     })
-  }
+  }, []);
 
   const {getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject} = useDropzone({onDrop})
   
