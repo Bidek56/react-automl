@@ -80,13 +80,17 @@ const Login = ({ setToken }: LoginProps ) => {
                 <Avatar>
                     <LockOutlined />
                 </Avatar>
-                <Typography component="h1" variant="h5">Sign in</Typography>
+                <Typography component="h1" variant="h5">AutoML sign in</Typography>
                 <form id="loginForm" noValidate onSubmit={handleSignIn}>
                     <TextField id="userInput" variant="outlined" margin="normal" required fullWidth
-                        label="User name" name="user" autoComplete="user" autoFocus onChange={e => userRef.current = e.target.value} />
+                        label="User name" name="user" autoComplete="user" autoFocus onChange={e => userRef.current = e.target.value} 
+                        inputProps={{ "data-testid": "userInput" }}
+                    />
                     <TextField id="passwordInput" variant="outlined" margin="normal" required fullWidth name="password"
-                        label="Password" type="password" autoComplete="current-password" onChange={e => passRef.current = e.target.value} />
-                    <Button id="signButton" type="submit" fullWidth variant="contained" color="primary">Sign in</Button>                    
+                        label="Password" type="password" autoComplete="current-password" onChange={e => passRef.current = e.target.value}
+                        inputProps={{ "data-testid": "passwordInput" }}
+                    />
+                    <Button id="signButton" type="submit" fullWidth variant="contained" color="primary" data-testid="signButton">Sign in</Button>                    
                 </form>
                 {loginError && <Alert severity="error">Login error: {loginError}</Alert>}
             </div>
