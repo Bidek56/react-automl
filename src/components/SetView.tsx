@@ -1,6 +1,5 @@
 import React from 'react';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow, Paper } from '@mui/material';
-import { DataGrid, GridToolbar, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
@@ -10,30 +9,11 @@ import Delete from '@mui/icons-material/Delete';
 import { StatusContext, contextType } from '../StatusContext';
 
 import NewDataSet from './NewDataSet'
+import ModelGrid from './ModelGrid'
+import ProfileGrid from './ProfileGrid'
 
 interface IDictionary<T> {
     [index:string]: T;
-}
-
-const ProfileGrid: React.FC<{dataSet: IDictionary<string>[]}> = ({dataSet}): JSX.Element => {
-
-    // console.log("Dataset1:", dataSet);
-
-    const columns: GridColDef[] = Object.keys(dataSet[0]).map((c) => {
-        return { field: c, headerName: c, width: 150 };
-    });
-
-    // eslint-disable-next-line
-    const rows: GridRowsProp[] = Object.entries(dataSet).map(([key, value]:[string, any]) => {
-        return { id: key, ...value };
-    });
-
-    return <DataGrid autoHeight rows={rows} columns={columns} components={{ Toolbar: GridToolbar }} />;
-}
-
-// eslint-disable-next-line
-const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> = ({ selectedSet, columns}): JSX.Element => {
-    return <div>Not implemented yet</div>
 }
 
 const SetView = (): JSX.Element => {
