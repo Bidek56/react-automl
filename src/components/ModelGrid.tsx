@@ -12,23 +12,28 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
 }));
 
-const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> = ({ selectedSet, columns}): JSX.Element => {
+const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> = ({selectedSet, columns}): JSX.Element => {
 
-    const models = ["Linear Regression"]
+    const models = ["Linear Regression", "Random Forests", "K Nearest Neighbors", "AdaBoost", "X Gradient Boosting", "MultiLayer Perceptron"]
 
     const [model, setModel] = React.useState<string|undefined>(models ? models[0] : undefined);
     const [responseVar, setResponseVar] = React.useState<string|undefined>(columns ? columns[0] : undefined);
 
-    const [kfold, setKfold] = React.useState<string>("3");
+    const [kfold, setKfold] = React.useState<string>("2");
     const [standardScaling, setStandardScaling] = React.useState<boolean>(false);
 
+    const [modelResp, setModelResp] = React.useState<Record<string, string> | undefined>();
     const [error, setError] = React.useState<string|undefined>()
     const [message, setMessage] = React.useState<string|undefined>()
 
     const { token } = React.useContext<contextType>(StatusContext);
 
-    const selectResponseChange = (event: SelectChangeEvent) => {
+    const selectModelChange = (event: SelectChangeEvent) => {
         setModel(event.target.value);
+    };
+
+    const selectResponseChange = (event: SelectChangeEvent) => {
+        setResponseVar(event.target.value);
     };
 
     const hangleStandardScaling = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -39,6 +44,7 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
 
         setError(undefined);
         setMessage(undefined);
+        setModelResp(undefined);
 
         const url = `http://${window.location.hostname}:5000/datasets/${selectedSet}/modelprocess/`;
 
@@ -67,9 +73,8 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
             const resp = await response.json();
 
             if(response.ok) {
-                // console.log(resp);
-                const message = resp?.msg !== undefined && resp["msg"];
-                setMessage(message);
+                console.log(resp);
+                setModelResp(resp);
             } else {
                 const excep = resp?.exception !== undefined && resp["exception"];
                 setError(excep)
@@ -85,43 +90,65 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
         return <div>Data set not selected</div>
     }
 
+    const allowed = ['alg', 'kfold', 'predictors', 'res'];
+
     return (
         <Grid container rowSpacing={1}>
             <Grid item xs={12}>
-                <Item><h2>Model options</h2></Item>
+                <Item><h3>Model options for {selectedSet}</h3></Item>
             </Grid>
-            <Grid item xs={6}>
-                <Item><h2>Algorithm</h2></Item>
-                <Select id="dropna" labelId='dropna' value={model} onChange={selectResponseChange} size="small">
-                            { models?.map( (c, index) => {
-                                return <MenuItem key={index} value={c}>{c}</MenuItem>;
-                            })}
-                </Select>
+            <Grid item xs={3}>
+                <Item>Algorithm :
+                    <Select id="dropna" labelId='dropna' value={model} onChange={selectModelChange} size="small">
+                                { models?.map( (c, index) => {
+                                    return <MenuItem key={index} value={c}>{c}</MenuItem>;
+                                })}
+                    </Select>
+                </Item>
             </Grid>
-            <Grid item xs={6}>
-                <Item><h2>Response Variable</h2></Item>
-                <Select id="dropna" labelId='dropna' value={responseVar} onChange={selectResponseChange} size="small">
-                            { columns && columns?.map( (c, index) => {
-                                return <MenuItem key={index} value={c}>{c}</MenuItem>;
-                            })}
-                </Select>
+            <Grid item xs={3}>
+                <Item>Response Variable :
+                    <Select id="dropna" labelId='dropna' value={responseVar} onChange={selectResponseChange} size="small">
+                                { columns && columns?.map( (c, index) => {
+                                    return <MenuItem key={index} value={c}>{c}</MenuItem>;
+                                })}
+                    </Select>
+                </Item>
             </Grid>
-            <Grid item xs={6}>
-                <Item><h2>K-Fold Cross-Validation</h2></Item>
-                <Select id="dropna" labelId='dropna' value={kfold} onChange={ (e) => setKfold(e?.target?.value)} size="small">
-                            { ["3", "5", "10"].map( (c, index) => {
-                                return <MenuItem key={index} value={c}>{c}</MenuItem>;
-                            })}
-                </Select>
+            <Grid item xs={3}>
+                <Item>K-Fold Cross-Validation
+                    <Select id="dropna" labelId='dropna' value={kfold} onChange={ (e) => setKfold(e?.target?.value)} size="small">
+                                { ["2","3", "5", "10"].map( (c, index) => {
+                                    return <MenuItem key={index} value={c}>{c}</MenuItem>;
+                                })}
+                    </Select>
+                </Item>
+            </Grid>
+            <Grid item xs={2}>
                 <Item>Standard Scaling
                     <Switch defaultChecked inputProps={{ 'aria-label': 'ant design' }} size="small" onChange={hangleStandardScaling}/>
                 </Item>
+            </Grid>
+            <Grid item xs={1}>
                 <Item>
                     <Button type="submit" onClick={createClick}>Fit Model</Button>
                 </Item>
-                {message && <Alert severity="info">{message}</Alert>}
-                {error && <Alert severity="error">Processing error: {error}</Alert>}
             </Grid>
+            {message && <Alert severity="info">{message}</Alert>}
+            {error && <Alert severity="error">Processing error: {error}</Alert>}
+            {modelResp && 
+                <div>
+                    {
+                        Object.entries(modelResp)
+                        .filter(([key]) => allowed.includes(key))
+                        .map(([key, value]:[string, string]) => {
+                            // console.log("K:", key, " val:", value);
+                            return <h3>{key} {value}</h3>
+                        })
+                    }
+                    <img src={`data:image/png;base64,${modelResp.figure}`} alt="bar plot"/>
+                </div>
+            }
         </Grid>
     )
 }

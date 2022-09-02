@@ -13,9 +13,10 @@ from flask_jwt_extended import (
     get_jwt_identity, set_access_cookies, unset_jwt_cookies
 )
 
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+# import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
 
 from werkzeug.utils import secure_filename
 
@@ -88,7 +89,7 @@ def delete(source = None, dataset = None):
       return jsonify(exception=traceback.format_exc()), 404
 
 def create_figure(df: pd.DataFrame):
-   fig = Figure()
+   fig = matplotlib.Figure()
    ax = fig.subplots(len(df.columns))
 
    fig.suptitle('Vertically stacked subplots')
@@ -251,7 +252,7 @@ def model_process(source: str = None, dataset: str = None):
       return { "msg": "model created",
                "scores": scores, "dataset": dataset, "alg": modelName,
                "res": res, "kfold": kfold,
-               "predictors": pred, "response": str(fig, 'utf-8')
+               "predictors": pred, "figure": str(fig, 'utf-8')
       }
    except Exception as e:
       print(traceback.format_exc())

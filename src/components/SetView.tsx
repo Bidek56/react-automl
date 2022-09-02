@@ -23,7 +23,8 @@ const SetView = (): JSX.Element => {
     const [dataDesc, setDataDesc] = React.useState<IDictionary<string>[] | null>(null);
     const [dataCols, setDataCols] = React.useState<string[] | null>(null);
     const [barPlot, setBarPlot] = React.useState<string | null>(null);
-    const [modelTraining, setModelTraining] = React.useState<boolean | null>(null);
+    const [fe, setFe] = React.useState<boolean>(false);
+    const [modelTraining, setModelTraining] = React.useState<boolean>(false);
 
     const [selectedDS, setSelectedDS] = React.useState<string | null>(null);
 
@@ -70,7 +71,8 @@ const SetView = (): JSX.Element => {
         setDataCols(null);
         setSelectedDS(null);
         setBarPlot(null);
-        setModelTraining(null);
+        setFe(false);
+        setModelTraining(false);
     }
 
     const handleProfile = async (dsName: string) => {
@@ -107,6 +109,19 @@ const SetView = (): JSX.Element => {
     };
 
     const handleFeSet = async (dsName: string) => {
+
+        if (fe) {
+            resetState();
+            return;
+        }
+
+        setFe(true);
+
+        // get DS columns
+        await setColumns(dsName);
+    }
+
+    const setColumns = async (dsName: string) => {
         // console.log("Columns action:", dsName);
 
         if (dataCols) {
@@ -201,36 +216,20 @@ const SetView = (): JSX.Element => {
     }
 
     const handleModel = async (dsName: string) => {
-        console.log("Model: " + dsName)
-
+        
         if (modelTraining) {
             resetState();
             return;            
         }
 
+        if (!dsName)
+            return
+
+        // get DS columns
+        await setColumns(dsName);
+
+        setSelectedDS(dsName);
         setModelTraining(true);
-
-        // const url = `http://${window.location.hostname}:5000/datasets/${dsName}/delete`;
-        // const options = {
-        //     method: "GET",
-        //     headers: {
-        //         Accept: "application/json",
-        //         "Content-Type": "application/json;charset=UTF-8",
-        //         Authorization: 'Bearer ' + token
-        //     }
-        // };
-
-        // const response = await fetch(url, options);
-        // const resp = await response?.json();
-
-        // // console.log("Resp:", resp);
-
-        // if (response.ok) {
-        //     fetchDatasets();
-        // } else {
-        //     const excep = resp?.exception !== undefined ? ":" + resp["exception"] : "";
-        //     setError(response.statusText + excep);
-        // }
     }
 
     return (
@@ -272,9 +271,9 @@ const SetView = (): JSX.Element => {
                     </Table>
                     { dataHead && <ProfileGrid dataSet={dataHead}/> }
                     { dataDesc && <ProfileGrid dataSet={dataDesc}/> }
-                    { dataCols && selectedDS && <NewDataSet selectedSet={selectedDS} columns={dataCols}/> }
+                    { fe && dataCols && selectedDS && <NewDataSet selectedSet={selectedDS} columns={dataCols}/> }
                     { barPlot && <img src={`data:image/png;base64,${barPlot}`} alt="bar plot"/>}
-                    { modelTraining && <ModelGrid selectedSet={selectedDS} columns={dataCols}/>}
+                    { modelTraining && selectedDS && dataCols && <ModelGrid selectedSet={selectedDS} columns={dataCols}/>}
                 </TableContainer>
     )
 
