@@ -74,7 +74,7 @@ const NewDataSet: React.FC<{selectedSet: string|null, columns: string[] | null}>
         setError(undefined);
         setMessage(undefined);
 
-        const url = `http://${window.location.hostname}:5000/datasets/${selectedSet}/preprocessed_dataset/`;
+        const url = `http://${window.location.hostname}:5000/datasets/${selectedSet}/preprocessed/`;
 
         const options = {
             method: "POST",

@@ -2,8 +2,11 @@ from typing import List
 from flask import Flask, request, jsonify, redirect
 import os, io, datetime, traceback, base64
 import pandas as pd
+import numpy as np
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
+import models as algorithms
+import plotfunctions as plotfun
 
 from flask_jwt_extended import (
     JWTManager, jwt_required, get_jwt, create_access_token,
@@ -184,7 +187,77 @@ def columns(source = None, dataset = None):
       print(e)
       return jsonify(exception=traceback.format_exc())
 
-@app.route('/datasets/<source>/<dataset>/preprocessed_dataset/', methods=['POST'])
+@app.route('/datasets/<source>/<dataset>/modelprocess/', methods=['POST'])
+@jwt_required()
+def model_process(source: str = None, dataset: str = None):
+
+   # print(f"request.json: {request.json}")
+
+   try:
+      modelName = request.json.get('model')
+      res = request.json.get('response')
+      kfold = request.json.get('kfold')
+      scaling = request.json.get('scaling')
+
+      # alg, score = modelName.split(' ')
+
+      variables = request.form.getlist('variables')
+
+      if not res:
+         return {"exception": "Missing model response variable"}, 400
+
+      if not kfold:
+         return {"exception": "Missing model kfold variable"}, 400
+
+      from sklearn.model_selection import cross_validate
+      from sklearn.preprocessing import StandardScaler
+      from sklearn.pipeline import Pipeline
+
+      df = loadDataset(source, dataset)
+      y = df[str(res)]
+
+      if variables != [] and '' not in variables: df = df[list(set(variables + [res]))]
+      X = df.drop(str(res), axis=1)
+      try: X = pd.get_dummies(X)
+      except: pass
+
+      predictors = X.columns
+      if len(predictors)>10: pred = str(len(predictors))
+      else: pred = ', '.join(predictors)    
+
+      if 'Classification' in modelName:
+         # from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_curve, auc
+         scoring = ['precision', 'recall', 'f1', 'accuracy', 'roc_auc']
+         if scaling == 'Yes':
+            clf = algorithms.classificationModels()[modelName]
+            mod = Pipeline([('scaler', StandardScaler()), ('clf', clf)])
+         else: 
+            mod = algorithms.classificationModels()[modelName]
+         fig = plotfun.plot_ROC(X.values, y, mod, int(kfold))
+
+      elif 'Regression' in modelName:
+         # from sklearn.metrics import explained_variance_score, r2_score, mean_squared_error
+         scoring = ['explained_variance', 'r2', 'neg_mean_squared_error']
+         if scaling == 'Yes':
+            pr = algorithms.regressionModels()[modelName]
+            mod = Pipeline([('scaler', StandardScaler()), ('clf', pr)])
+         else: mod = algorithms.regressionModels()[modelName]
+         fig = plotfun.plot_predVSreal(X, y, mod, int(kfold))
+      
+      scores = cross_validate(mod, X, y, cv=int(kfold), scoring=scoring)
+      for s in scores:
+         scores[s] = str(round(np.mean(scores[s]),3))
+
+      return { "msg": "model created",
+               "scores": scores, "dataset": dataset, "alg": modelName,
+               "res": res, "kfold": kfold,
+               "predictors": pred, "response": str(fig, 'utf-8')
+      }
+   except Exception as e:
+      print(traceback.format_exc())
+      return {"exception": f"'{e}'"}, 400
+
+@app.route('/datasets/<source>/<dataset>/preprocessed/', methods=['POST'])
 @jwt_required()
 def preprocessed_dataset(source: str = None, dataset: str = None):
 

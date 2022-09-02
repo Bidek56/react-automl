@@ -103,11 +103,33 @@ class TestApp(unittest.TestCase):
 
         self.assertTrue("imageBytes" in res)
 
-        if "msg":
+        if "msg" in res:
             self.assertEqual(res["msg"], "graph successful")
 
         # print(f"Res: {response.status_code}")
         # print(f"Res: {response.get_json()}")
+
+    def test_model(self):
+
+        data = { 'model' : 'Linear Regression', 'response': 'b', 'kfold': 2 }
+        
+        response = self.client.post('/datasets/original/sample.csv/modelprocess', follow_redirects=True, 
+                        data=json.dumps(data), content_type='application/json',
+                        headers={"Authorization": f"Bearer {self.__class__.token}"})
+
+        # print(f"Res: {response.status_code}")
+        # print(f"Res: {response.get_json()}")
+
+        res = response.get_json()
+
+        if "exception" in res:
+            print(f'Exception: {res["exception"]}')
+
+        self.assertEqual(response.status_code, 200)
+
+        if "msg" in res:
+            self.assertEqual(res["msg"], "model created")
+
 
 @unittest.skip("demonstrating skipping")
 class TestStringMethods(unittest.TestCase):
