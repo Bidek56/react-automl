@@ -14,9 +14,10 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> = ({selectedSet, columns}): JSX.Element => {
 
-    const models = ["Linear Regression", "Random Forests", "K Nearest Neighbors", "AdaBoost", "X Gradient Boosting", "MultiLayer Perceptron"]
+    const regModels = ["Linear Regression", "Random Forests Regression", "K Nearest Neighbors Regression", "AdaBoost Regression", "X Gradient Boosting Regression", "MultiLayer Perceptron Regression"]
+    const clsModels = ["Logistic Classification", "Random Forests Classification", "K Nearest Neighbors Classification", "AdaBoost Classification", "X Gradient Boosting Classification", "MultiLayer Perceptron Classification"]
 
-    const [model, setModel] = React.useState<string|undefined>(models ? models[0] : undefined);
+    const [model, setModel] = React.useState<string|undefined>(regModels ? regModels[0] : undefined);
     const [responseVar, setResponseVar] = React.useState<string|undefined>(columns ? columns[0] : undefined);
 
     const [kfold, setKfold] = React.useState<string>("2");
@@ -85,7 +86,7 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
             setError(err + ":" + url);
         }
     }
-
+    
     if (!selectedSet) {
         return <div>Data set not selected</div>
     }
@@ -100,7 +101,7 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
             <Grid item xs={3}>
                 <Item>Algorithm :
                     <Select id="dropna" labelId='dropna' value={model} onChange={selectModelChange} size="small">
-                                { models?.map( (c, index) => {
+                                { regModels.concat(clsModels)?.map( (c, index) => {
                                     return <MenuItem key={index} value={c}>{c}</MenuItem>;
                                 })}
                     </Select>

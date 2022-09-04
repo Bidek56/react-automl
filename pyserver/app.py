@@ -89,7 +89,7 @@ def delete(source = None, dataset = None):
       return jsonify(exception=traceback.format_exc()), 404
 
 def create_figure(df: pd.DataFrame):
-   fig = matplotlib.Figure()
+   fig = matplotlib.figure.Figure()
    ax = fig.subplots(len(df.columns))
 
    fig.suptitle('Vertically stacked subplots')
