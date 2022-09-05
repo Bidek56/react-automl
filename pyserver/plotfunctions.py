@@ -7,6 +7,7 @@ Created on Thu Sep 2 13:29:55 2022
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import base64, io
 
 #Plot ROC curves
 def plot_ROC(X, y, classifier, cv):
@@ -75,11 +76,12 @@ def plot_predVSreal(X, y, classifier, cv):
     plt.plot([y.min(), y.max()], [y.min(), y.max()], 'k--', lw=4)
     plt.xlabel('Measured')
     plt.ylabel('Predicted')
-    from io import BytesIO
-    figfile = BytesIO()
+
+    plt.title(f"Cross validation for {str(classifier)}")
+
+    figfile = io.BytesIO()
     plt.savefig(figfile, format='png')
     figfile.seek(0)  # rewind to beginning of file
-    import base64
     figdata_png = base64.b64encode(figfile.getvalue())
     return figdata_png
 

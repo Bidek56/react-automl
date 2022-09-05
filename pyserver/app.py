@@ -15,7 +15,6 @@ from flask_jwt_extended import (
 
 import matplotlib
 matplotlib.use('Agg')
-# import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from werkzeug.utils import secure_filename
@@ -200,8 +199,6 @@ def model_process(source: str = None, dataset: str = None):
       kfold = request.json.get('kfold')
       scaling = request.json.get('scaling')
 
-      # alg, score = modelName.split(' ')
-
       variables = request.form.getlist('variables')
 
       if not res:
@@ -250,9 +247,9 @@ def model_process(source: str = None, dataset: str = None):
          scores[s] = str(round(np.mean(scores[s]),3))
 
       return { "msg": "model created",
-               "scores": scores, "dataset": dataset, "alg": modelName,
-               "res": res, "kfold": kfold,
-               "predictors": pred, "figure": str(fig, 'utf-8')
+               "scores": scores, "dataset": dataset, "alorithm": modelName,
+               "y": res, "kfold": kfold,
+               "x": pred, "figure": str(fig, 'utf-8')
       }
    except Exception as e:
       print(traceback.format_exc())

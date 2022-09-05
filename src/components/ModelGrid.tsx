@@ -74,7 +74,7 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
             const resp = await response.json();
 
             if(response.ok) {
-                console.log(resp);
+                // console.log(resp);
                 setModelResp(resp);
             } else {
                 const excep = resp?.exception !== undefined && resp["exception"];
@@ -91,7 +91,7 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
         return <div>Data set not selected</div>
     }
 
-    const allowed = ['alg', 'kfold', 'predictors', 'res'];
+    const allowed = ['alorithm', 'kfold', 'y', 'x', 'scores'];
 
     return (
         <Grid container rowSpacing={1}>
@@ -138,17 +138,30 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
             {message && <Alert severity="info">{message}</Alert>}
             {error && <Alert severity="error">Processing error: {error}</Alert>}
             {modelResp && 
-                <div>
-                    {
-                        Object.entries(modelResp)
-                        .filter(([key]) => allowed.includes(key))
-                        .map(([key, value]:[string, string]) => {
-                            // console.log("K:", key, " val:", value);
-                            return <h3>{key} {value}</h3>
-                        })
-                    }
-                    <img src={`data:image/png;base64,${modelResp.figure}`} alt="bar plot"/>
-                </div>
+                <Grid container rowSpacing={1}>  
+                    <Grid item xs={8}>
+                        <Item>
+                            <img src={`data:image/png;base64,${modelResp.figure}`} alt="bar plot"/>
+                        </Item>
+                    </Grid>
+                    <Grid item xs={4}>
+                        {
+                            Object.entries(modelResp)
+                            .filter(([key]) => allowed.includes(key))
+                            .map(([key, value]:[string, string|object], indx:number) => {
+                                // console.log("K:", key, " val:", typeof(value));
+                                if (typeof(value) === 'string') {
+                                    return <Item key={indx}>{key}:{value}</Item>
+                                } else if (typeof(value) === 'object') {
+                                    return Object.entries(value).map(([key2, val2]:[string, string], indx2:number) => {
+                                        // console.log("K:", key2, " val:", val2);
+                                        return <Item key={indx2}>{key2}:{val2}</Item>
+                                    })
+                                }
+                            })
+                        }
+                    </Grid>
+                </Grid>
             }
         </Grid>
     )
