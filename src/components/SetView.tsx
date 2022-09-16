@@ -12,7 +12,7 @@ import NewDataSet from './NewDataSet'
 import ModelGrid from './ModelGrid'
 import ProfileGrid from './ProfileGrid'
 
-interface IDictionary<T> {
+export interface IDictionary<T> {
     [index:string]: T;
 }
 

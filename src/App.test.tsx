@@ -4,6 +4,10 @@ import { setupServer } from 'msw/node'
 import { render, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import App from './App';
 import Login from './components/Login';
+import NewDataSet from './components/NewDataSet';
+import ModelGrid from './components/ModelGrid';
+import ProfileGrid from './components/ProfileGrid';
+import {IDictionary} from './components/SetView';
 
 const server = setupServer(
   rest.post('http://localhost:5000/login', (req, res, ctx) => {
@@ -44,7 +48,6 @@ test('render App comp', async () => {
   expect(menuText).toBeInTheDocument();
 });
 
-
 test('render Login comp', async () => {
 
   const setToken = jest.fn();
@@ -71,3 +74,28 @@ test('render Login comp', async () => {
 
   fireEvent.click(signButton);
 });
+
+test('render Model grid comp', async () => {
+
+  const { getByText, getByTestId } = render(<ModelGrid selectedSet={'class1.csv'} columns={['test1', 'test2', 'test3']} />);
+
+  const modelElement = getByText(/Model options/);
+  expect(modelElement).toBeInTheDocument();
+})
+
+test('render New Data set grid comp', async () => {
+
+  const { getByText, getByTestId } = render(<NewDataSet selectedSet={'class1.csv'} columns={['test1', 'test2', 'test3']} />);
+
+  const modelElement = getByText(/Preprocessing options/);
+  expect(modelElement).toBeInTheDocument();
+})
+
+test('render Profile grid comp', async () => {
+
+  const dataSet: IDictionary<string>[] = [{ 'a': '1'}]
+  const { getByText, getByTestId } = render(<ProfileGrid dataSet={dataSet}/>);
+
+  const modelElement = getByText(/Columns/);
+  expect(modelElement).toBeInTheDocument();
+})
