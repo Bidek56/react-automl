@@ -46,7 +46,7 @@ class TestApp(unittest.TestCase):
         # print(response.get_json())
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json(), ['original/sample.csv', 'original/boston_house_prices.csv'])
+        self.assertEqual(response.get_json(), ['original/class1.csv', 'original/sample.csv', 'original/boston_house_prices.csv'])
 
     def test_upload_csv(self):
         folder = "original"
@@ -111,9 +111,9 @@ class TestApp(unittest.TestCase):
 
     def test_model(self):
 
-        data = { 'model' : 'Linear Regression', 'response': 'b', 'kfold': 2 }
+        data = { 'model' : 'Linear Regression', 'response': 'test1', 'kfold': 2 }
         
-        response = self.client.post('/datasets/original/sample.csv/modelprocess', follow_redirects=True, 
+        response = self.client.post('/datasets/original/class1.csv/modelprocess', follow_redirects=True, 
                         data=json.dumps(data), content_type='application/json',
                         headers={"Authorization": f"Bearer {self.__class__.token}"})
 
