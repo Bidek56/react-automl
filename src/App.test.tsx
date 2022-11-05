@@ -1,13 +1,14 @@
 import React from 'react';
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import { render, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
 import Login from './components/Login';
 import NewDataSet from './components/NewDataSet';
 import ModelGrid from './components/ModelGrid';
 import ProfileGrid from './components/ProfileGrid';
-import {IDictionary} from './components/SetView';
+import UploadFile from './components/UploadFile'
+import SetView, {IDictionary} from './components/SetView';
 
 const server = setupServer(
   rest.post('http://localhost:5000/login', (req, res, ctx) => {
@@ -94,8 +95,22 @@ test('render New Data set grid comp', async () => {
 test('render Profile grid comp', async () => {
 
   const dataSet: IDictionary<string>[] = [{ 'a': '1'}]
-  const { getByText, getByTestId } = render(<ProfileGrid dataSet={dataSet}/>);
+  const { getByText } = render(<ProfileGrid dataSet={dataSet}/>);
 
   const modelElement = getByText(/Columns/);
   expect(modelElement).toBeInTheDocument();
+})
+
+test('render Upload comp', async () => {
+  const { getByText } = render(<UploadFile/>)
+
+  const dragElement = getByText("Drag 'n' drop some files here, or click to select files")
+  expect(dragElement).toBeInTheDocument();
+})
+
+test('render SetView file comp', async () => {
+  const { getByText } = render(<SetView/>)
+
+  const deleteElement = getByText("Delete")
+  expect(deleteElement).toBeInTheDocument();
 })
