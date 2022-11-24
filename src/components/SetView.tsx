@@ -36,7 +36,8 @@ const SetView = (): JSX.Element => {
     const fetchDatasets = React.useCallback(
         async () => {
 
-            const url = `http://${window.location.hostname}:5000/`;
+            // const url = `http://${window.location.hostname}:5000/`;
+            const url = `http://127.0.0.1:5000/`;
             const options = {
                 method: "GET",
                 headers: {

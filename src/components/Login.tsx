@@ -23,8 +23,9 @@ const Login = ({ setToken }: LoginProps ) => {
     const [loginError, setLoginError] = React.useState<string|undefined>()
 
     const logMeIn = async () => {
+        // const url = `http://${window.location.host}:5000/login`;
+        const url = `http://127.0.0.1:5000/login`;
 
-        const url = `http://${window.location.hostname}:5000/login`;
         const options = {
             method: "POST",
             headers: {

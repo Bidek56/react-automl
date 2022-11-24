@@ -1,7 +1,7 @@
-import React from 'react';
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { render, fireEvent, waitFor } from '@testing-library/react';
+import { expect, test, beforeAll, afterEach, afterAll, vi } from 'vitest'
 import App from './App';
 import Login from './components/Login';
 import NewDataSet from './components/NewDataSet';
@@ -51,7 +51,7 @@ test('render App comp', async () => {
 
 test('render Login comp', async () => {
 
-  const setToken = jest.fn();
+  const setToken = vi.fn();
   const { getByText, getByTestId } = render(<Login setToken={setToken} />);
 
   const linkElement = getByText(/Copyright/i);
