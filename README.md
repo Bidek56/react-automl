@@ -1,6 +1,6 @@
 ### The purpose of this project is to create a modern UI using React which connects to Python Flask server
   
-The client of this project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and it uses [MUI](https://mui.com/)
+The client of this project was bootstrapped with [Vite](https://vitejs.dev) and it uses [MUI](https://mui.com/)
 
 To install MUI with React 18, please `npm i --legacy-peer-deps` until MUI fixes it's support for React 18
 
