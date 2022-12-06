@@ -8,7 +8,7 @@ To install MUI with React 18, please `npm i --legacy-peer-deps` until MUI fixes 
 
 In the main project directory, you can run:
 
-1. #### `npm start`
+1. #### `npm dev`
 
     Runs the client app in the development mode.<br />
     Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
@@ -19,7 +19,7 @@ In the main project directory, you can run:
 2. #### `npm test`
 
     Launches the test runner in the interactive watch mode.<br />
-    See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    See the section about [running tests](https://vitest.dev) for more information.
 
 3. #### `npm run build`
 
@@ -29,11 +29,11 @@ In the main project directory, you can run:
     The build is minified and the filenames include the hashes.<br />
     Your app is ready to be deployed!
 
-    See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    See the section about [deployment](https://vitejs.dev/guide/static-deploy.html) for more information.
 
 ### Python server
 
-Python server is using Flask, Socket-IO and Python 3.10
+Python server is using Flask, Socket-IO and Python 3.11
 
 To run the Python server:
 1. cd to the pyserver dir: `cd pyserver`
