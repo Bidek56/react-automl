@@ -37,8 +37,8 @@ Python server is using Flask, Socket-IO and Python 3.11
 
 To run the Python server:
 1. cd to the pyserver dir: `cd pyserver`
-2. Create local virtual env: `python -m venv venv`
-3. Activate local virtual env: `./venv/bin/activate`
+2. Create local virtual env: `python -m venv .venv`
+3. Activate local virtual env: `source ./.venv/bin/activate`
 4. Install pip libraries: `pip install -r requirements.txt`
 5. Start the Flask server: `python app.py`
 
