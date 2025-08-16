@@ -95,10 +95,10 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
 
     return (
         <Grid container rowSpacing={1}>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Item><h3>Model options for {selectedSet}</h3></Item>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={3}>
                 <Item>Algorithm :
                     <Select id="dropna" labelId='dropna' value={model} onChange={selectModelChange} size="small">
                                 { regModels.concat(clsModels)?.map( (c, index) => {
@@ -107,7 +107,7 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
                     </Select>
                 </Item>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={3}>
                 <Item>Response Variable :
                     <Select id="dropna" labelId='dropna' value={responseVar} onChange={selectResponseChange} size="small">
                                 { columns && columns?.map( (c, index) => {
@@ -116,7 +116,7 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
                     </Select>
                 </Item>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={3}>
                 <Item>K-Fold Cross-Validation
                     <Select id="dropna" labelId='dropna' value={kfold} onChange={ (e) => setKfold(e?.target?.value)} size="small">
                                 { ["2","3", "5", "10"].map( (c, index) => {
@@ -125,12 +125,12 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
                     </Select>
                 </Item>
             </Grid>
-            <Grid item xs={2}>
+            <Grid size={2}>
                 <Item>Standard Scaling
                     <Switch defaultChecked inputProps={{ 'aria-label': 'ant design' }} size="small" onChange={hangleStandardScaling}/>
                 </Item>
             </Grid>
-            <Grid item xs={1}>
+            <Grid size={1}>
                 <Item>
                     <Button type="submit" onClick={createClick}>Fit Model</Button>
                 </Item>
@@ -139,12 +139,12 @@ const ModelGrid: React.FC<{selectedSet: string|null, columns: string[] | null}> 
             {error && <Alert severity="error">Processing error: {error}</Alert>}
             {modelResp && 
                 <Grid container rowSpacing={1}>  
-                    <Grid item xs={8}>
+                    <Grid size={8}>
                         <Item>
                             <img src={`data:image/png;base64,${modelResp.figure}`} alt="bar plot"/>
                         </Item>
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                         {
                             Object.entries(modelResp)
                             .filter(([key]) => allowed.includes(key))

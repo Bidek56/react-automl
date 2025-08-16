@@ -41,6 +41,7 @@ To run the Python server:
 3. Activate local virtual env: `source ./.venv/bin/activate`
 4. Install pip libraries: `pip install -r requirements.txt`
 5. Start the Flask server: `python app.py`
+6. Test: `python test_server.py`
 
 Or start it using nodemon
 

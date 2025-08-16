@@ -119,10 +119,10 @@ const NewDataSet: React.FC<{selectedSet: string|null, columns: string[] | null}>
 
     return (
             <Grid container rowSpacing={1}>
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Item><h2>Preprocessing options</h2></Item>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={6}>
                     <Item><h3>Feature Selection</h3></Item>
                     <Item><h4>Automatic selection (Chi-squared)</h4></Item>
                     <Item>
@@ -159,7 +159,7 @@ const NewDataSet: React.FC<{selectedSet: string|null, columns: string[] | null}>
                         </List>
                     </Item>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={6}>
                     <Item><h3>Null values and unique value variables</h3></Item>
                     <Item>Drop rows with null values if...
                         <Select id="dropNull" labelId='dropNull' value={dropNull} size="small" onChange={dropNullChange}>

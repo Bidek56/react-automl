@@ -39,7 +39,7 @@ const Container = styled.div<IDiv>`
   transition: border .24s ease-in-out;
 `;
 
-const UploadFile = () : JSX.Element => {
+const UploadFile = () : React.JSX.Element => {
 
   const { token } = React.useContext<contextType>(StatusContext);
   const [ error, setError ] = React.useState<string|undefined>();
@@ -90,8 +90,13 @@ const UploadFile = () : JSX.Element => {
   return (
       <Container {...getRootProps({isDragActive, isDragAccept, isDragReject})}>
         <input {...getInputProps()} />
-        <p>Drag 'n' drop some files here, or click to select files</p>
-        <em>(Only *.csv files will be accepted)</em>
+        {
+          isDragActive ?
+                  <p>Drop the files here ...</p> :
+                  <p>Drag 'n' drop some files here, or click to select files<br/>
+                    <em>(Only *.csv files will be accepted)</em>
+                  </p>
+        }
       </Container>
   )
 };

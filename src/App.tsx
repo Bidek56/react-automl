@@ -4,6 +4,8 @@ import NavBar from './components/NavBar'
 import Login from './components/Login'
 import UploadFile from './components/UploadFile'
 import SetView from './components/SetView'
+import { StyleSheetManager } from 'styled-components';
+import isPropValid from '@emotion/is-prop-valid';
 
 import useToken from './useToken'
 
@@ -44,8 +46,18 @@ const App = () => {
     }
 
     // console.log("Token:", token);
+    // This implements the default behavior from styled-components v5
+    const shouldForwardProp = (propName: string, target: any) => {
+        if (typeof target === "string") {
+            // For HTML elements, forward the prop if it is a valid HTML attribute
+            return isPropValid(propName);
+        }
+        // For other elements, forward all props
+        return true;
+    }
 
     return (
+        <StyleSheetManager shouldForwardProp={shouldForwardProp}>
             <StatusContext.Provider value={statusValue}>
                 { token ?
                     <div>
@@ -57,6 +69,7 @@ const App = () => {
                     </div> : <Login setToken={setToken} />
                 }
             </StatusContext.Provider>
+        </StyleSheetManager>
     )
 }
 
