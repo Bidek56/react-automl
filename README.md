@@ -2,8 +2,6 @@
 
 The client of this project was bootstrapped with [Vite](https://vitejs.dev) and it uses [MUI](https://mui.com/)
 
-To install MUI with React 18, please `npm i --legacy-peer-deps` until MUI fixes it's support for React 18
-
 ### React client
 
 In the main project directory, you can run:
